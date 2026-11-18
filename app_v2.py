@@ -1,5 +1,5 @@
-"""C.L.O.U.D. Sense - Tablero de control interactivo (Streamlit) - Versión Editorial Final v2.6.
-Correcciones: Mapa centrado en Tizimín, Yucatán, y sidebar 100% oscuro."""
+"""C.L.O.U.D. Sense - Tablero de control interactivo (Streamlit) - Versión Editorial Final v3.0.
+Correcciones: Mapa con fitbounds, sidebar 100% oscuro."""
 from pathlib import Path
 import numpy as np, pandas as pd, plotly.express as px, plotly.graph_objects as go, streamlit as st
 import json
@@ -25,7 +25,7 @@ ESTADO_COL = {"Crítico": BRICK, "Atención": MUSTARD, "Normal": TEAL, "Sin cons
 st.set_page_config(page_title="C.L.O.U.D. Sense", page_icon=str(ASSETS / "icono.png"), layout="wide", initial_sidebar_state="auto")
 st.logo(str(ASSETS / "logo_horizontal.png"), icon_image=str(ASSETS / "icono.png"), size="large")
 
-# CSS Editorial (Corregido y Simplificado)
+# CSS Editorial
 st.markdown(f"""<style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
 
@@ -46,29 +46,32 @@ h1, h2, h3, h4, h5 {{
     header[data-testid="stHeader"] {{ background: transparent; }}
 }}
 
-/* Sidebar: Azul Profundo con letras claras */
+/* Sidebar Azul Profundo */
 section[data-testid="stSidebar"] {{
     background-color: {NAVY} !important;
 }}
-/* Forzar que TODO lo que esté dentro del sidebar sea claro y legible */
+/* Forzar letras claras en todo el sidebar */
 section[data-testid="stSidebar"] * {{
     color: #F4F1EA !important;
 }}
-/* Quitar fondos blancos de los inputs y expanders en el sidebar */
+/* Forzar fondo transparente/oscuro en TODOS los componentes del sidebar */
 section[data-testid="stSidebar"] div[data-testid="stExpander"],
+section[data-testid="stSidebar"] div[data-testid="stFileUploader"],
+section[data-testid="stSidebar"] div[data-testid="stPopover"],
+section[data-testid="stSidebar"] div[data-testid="stTextInput"] {{
+    background-color: transparent !important;
+}}
+/* Cajas de los expanders y uploader */
 section[data-testid="stSidebar"] div[data-testid="stExpander"] details,
 section[data-testid="stSidebar"] div[data-testid="stFileUploaderDropzone"],
-section[data-testid="stSidebar"] input {{
-    background-color: transparent !important;
-    border-color: #2E5075 !important;
-}}
-/* Corregir los recuadros grises de los expanders */
-section[data-testid="stSidebar"] div[data-testid="stExpander"] summary {{
+section[data-testid="stSidebar"] div[data-baseweb="input"] {{
     background-color: #152E4A !important;
+    border: 1px solid #2E5075 !important;
     border-radius: 4px;
 }}
-section[data-testid="stSidebar"] div[data-testid="stExpander"] div[role="region"] {{
-    background-color: #152E4A !important;
+/* Texto dentro de los inputs */
+section[data-testid="stSidebar"] input, section[data-testid="stSidebar"] span {{
+    color: #F4F1EA !important;
 }}
 
 /* Enlaces del Sidebar */
@@ -520,12 +523,10 @@ def analisis1():
                     color_continuous_scale=["#F4F1EA", TERRACOTA],
                     title="Cobertura de tanques por estado"
                 )
-                # CORRECCIÓN: Centrado en Tizimín, Yucatán. Si hay más datos, se expande.
+                # CORRECCIÓN DEFINITIVA: fitbounds se ajusta a los estados con datos
                 fig_map.update_geos(
                     fitbounds="locations", 
-                    visible=False, 
-                    center=dict(lat=21.14, lon=-88.15), 
-                    projection_scale=5
+                    visible=False
                 )
                 st.plotly_chart(style(fig_map, 400), width="stretch")
             except Exception as e:
