@@ -1,0 +1,14 @@
+tipo,frecuencia,sin_gas,perdida,fuga,como_sabe,utilidad,importa,pago_unico,uso,pago_mes,compraria
+Gas LP en cilindro,Cada mes,Varias veces,,Varias veces,Moviendo/pesando el tanque,5.0,Evitar fugas,Menos de $600,Yo mismo con la app,$30 - $60,Tal vez
+Gas LP en cilindro,Cada 2 semanas,Varias veces,,Una vez,Moviendo/pesando el tanque,3.0,Que no se acabe,Menos de $600,Yo mismo con la app,Nada,Tal vez
+Gas LP en cilindro,Cada semana,Una vez,,Nunca,A ojo,1.0,Evitar fugas,"$600 - $1,000",Que lo monitoreen por mí,$30 - $60,Sí
+Gas LP en cilindro,Cada mes,Varias veces,,Varias veces,A ojo,4.0,Que no se acabe,Menos de $600,Yo mismo con la app,,Tal vez
+Gas LP en cilindro,Cada 2-3 meses,Varias veces,,Nunca,Moviendo/pesando el tanque,5.0,Que no se acabe,Menos de $600,Yo mismo con la app,Más de $100,Sí
+Tanque estacionario,Cada 2-3 meses,Varias veces,2.0,Una vez,No lo sé,5.0,Que no se acabe,"$1,000 - $1,500",Que lo monitoreen por mí,$60 - $100,Sí
+Gas LP en cilindro,Cada mes,Una vez,,Nunca,Moviendo/pesando el tanque,5.0,Pedir recarga fácil,"$600 - $1,000",Yo mismo con la app,$60 - $100,Sí
+Gas LP en cilindro,Cada 2-3 meses,Una vez,,Varias veces,No lo sé,5.0,Evitar fugas,Menos de $600,Que lo monitoreen por mí,Nada,Sí
+Gas LP en cilindro,Cada mes,Una vez,0.0,Una vez,Moviendo/pesando el tanque,3.0,Evitar fugas,"$600 - $1,000",Yo mismo con la app,$30 - $60,Sí
+Gas LP en cilindro,Cada mes,Varias veces,,Varias veces,No lo sé,5.0,Que no se acabe,"$600 - $1,000",Yo mismo con la app,$60 - $100,Sí
+Gas LP en cilindro,Cada 2-3 meses,Una vez,,Una vez,No lo sé,4.0,Ahorra,"$600 - $1,000",Que lo monitoreen por mí,$30 - $60,Sí
+,,,,,,,,,,,
+Gas LP en cilindro,Cada 2-3 meses,Varias veces,,Una vez,Moviendo/pesando el tanque,5.0,Evitar fugas,Menos de $600,Yo mismo con la app,$60 - $100,Sí
