@@ -1,5 +1,5 @@
-"""C.L.O.U.D. Sense - Tablero de control interactivo (Streamlit) - Versión Editorial v2.4.
-Correcciones: Fondo del sidebar nativo, sintaxis de Python validada."""
+"""C.L.O.U.D. Sense - Tablero de control interactivo (Streamlit) - Versión Editorial Final v2.6.
+Correcciones: Mapa centrado en Tizimín, Yucatán, y sidebar 100% oscuro."""
 from pathlib import Path
 import numpy as np, pandas as pd, plotly.express as px, plotly.graph_objects as go, streamlit as st
 import json
@@ -55,11 +55,20 @@ section[data-testid="stSidebar"] * {{
     color: #F4F1EA !important;
 }}
 /* Quitar fondos blancos de los inputs y expanders en el sidebar */
+section[data-testid="stSidebar"] div[data-testid="stExpander"],
 section[data-testid="stSidebar"] div[data-testid="stExpander"] details,
 section[data-testid="stSidebar"] div[data-testid="stFileUploaderDropzone"],
 section[data-testid="stSidebar"] input {{
-    background-color: #152E4A !important;
+    background-color: transparent !important;
     border-color: #2E5075 !important;
+}}
+/* Corregir los recuadros grises de los expanders */
+section[data-testid="stSidebar"] div[data-testid="stExpander"] summary {{
+    background-color: #152E4A !important;
+    border-radius: 4px;
+}}
+section[data-testid="stSidebar"] div[data-testid="stExpander"] div[role="region"] {{
+    background-color: #152E4A !important;
 }}
 
 /* Enlaces del Sidebar */
@@ -511,7 +520,13 @@ def analisis1():
                     color_continuous_scale=["#F4F1EA", TERRACOTA],
                     title="Cobertura de tanques por estado"
                 )
-                fig_map.update_geos(fitbounds="locations", visible=False)
+                # CORRECCIÓN: Centrado en Tizimín, Yucatán. Si hay más datos, se expande.
+                fig_map.update_geos(
+                    fitbounds="locations", 
+                    visible=False, 
+                    center=dict(lat=21.14, lon=-88.15), 
+                    projection_scale=5
+                )
                 st.plotly_chart(style(fig_map, 400), width="stretch")
             except Exception as e:
                 st.warning("Cargando mapa... Si no aparece, asegúrate de que mexico.json esté en la carpeta.")
