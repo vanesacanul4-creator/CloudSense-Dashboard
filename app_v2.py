@@ -1,5 +1,5 @@
-"""C.L.O.U.D. Sense - Tablero de control interactivo (Streamlit) - Versión Editorial Final v4.1.
-Correcciones: Mapa Folium (calles de Tizimín) y sidebar integrado."""
+"""C.L.O.U.D. Sense - Tablero de control interactivo (Streamlit) - Versión Editorial Final v5.0.
+Correcciones: Mapa Folium estable, sidebar integrado y listo para capturas."""
 from pathlib import Path
 import numpy as np, pandas as pd, plotly.express as px, plotly.graph_objects as go, streamlit as st
 import folium
@@ -509,7 +509,7 @@ def analisis1():
         # MAPA DE FOLIUM (Calles reales de Tizimín)
         if not tq.dropna(subset=['latitud', 'longitud']).empty:
             # Centro en Tizimín
-            m = folium.Map(location=[21.143, -88.15], zoom_start=13, tiles="CartoDB positron")
+            m = folium.Map(location=[21.143, -88.15], zoom_start=13, tiles="OpenStreetMap")
             
             for _, row in tq.dropna(subset=['latitud', 'longitud']).iterrows():
                 # Determinamos color según si tiene fugas (simulado para el demo)
@@ -631,7 +631,7 @@ def analisis3():
         a, b = st.columns([1.6, 1]); ll = m.dropna(subset=["latitud", "longitud"])
         if len(ll):
             # Mapa de fugas con Folium
-            mf = folium.Map(location=[21.143, -88.15], zoom_start=13, tiles="CartoDB positron")
+            mf = folium.Map(location=[21.143, -88.15], zoom_start=13, tiles="OpenStreetMap")
             for _, row in ll.iterrows():
                 color = "red" if row['gravedad'] == "Alta" else ("orange" if row['gravedad'] == "Media" else "green")
                 folium.Marker(
