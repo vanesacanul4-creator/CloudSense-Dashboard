@@ -1,8 +1,8 @@
-"""C.L.O.U.D. Sense - Tablero de control interactivo (Streamlit) - Versión Editorial v2.1.
-Datos reales: data/lecturas_mq.csv (ETL) y data/Plantilla_CloudSense.xlsx (pruebas). Nunca se inventan datos;
-la 'vista previa de diseño' es opcional, está apagada por defecto y siempre se rotula como datos de ejemplo."""
+"""C.L.O.U.D. Sense - Tablero de control interactivo (Streamlit) - Versión Editorial v2.2.
+Correcciones: legibilidad de inputs, textos en tarjetas, menú móvil y mapa."""
 from pathlib import Path
 import numpy as np, pandas as pd, plotly.express as px, plotly.graph_objects as go, streamlit as st
+import json
 
 px.defaults.template = 'plotly_white'
 
@@ -25,7 +25,7 @@ ESTADO_COL = {"Crítico": BRICK, "Atención": MUSTARD, "Normal": TEAL, "Sin cons
 st.set_page_config(page_title="C.L.O.U.D. Sense", page_icon=str(ASSETS / "icono.png"), layout="wide", initial_sidebar_state="auto")
 st.logo(str(ASSETS / "logo_horizontal.png"), icon_image=str(ASSETS / "icono.png"), size="large")
 
-# CSS Editorial (Corregido)
+# CSS Editorial (Corregido para inputs, textos y móvil)
 st.markdown(f"""<style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
 
@@ -40,9 +40,11 @@ h1, h2, h3, h4, h5 {{
 }}
 .block-container {{ padding-top: 2rem; padding-bottom: 2rem; max-width: 1400px; }}
 
-/* Ocultar barra superior y pie de Streamlit */
-[data-testid="stToolbarActions"], [data-testid="stAppDeployButton"], [data-testid="stMainMenu"], [data-testid="stDecoration"], footer, [data-testid="stSidebarResizeHandle"] {{ display: none !important; }}
-header[data-testid="stHeader"] {{ background: transparent; }}
+/* Ocultar barra superior SOLO en escritorio para mantener el diseño limpio */
+@media (min-width: 768px) {{
+    [data-testid="stToolbarActions"], [data-testid="stAppDeployButton"], [data-testid="stMainMenu"], [data-testid="stDecoration"], footer, [data-testid="stSidebarResizeHandle"] {{ display: none !important; }}
+    header[data-testid="stHeader"] {{ background: transparent; }}
+}}
 
 /* Sidebar Azul Profundo */
 section[data-testid="stSidebar"] {{
@@ -51,6 +53,18 @@ section[data-testid="stSidebar"] {{
 }}
 section[data-testid="stSidebar"] * {{ color: #F4F1EA !important; }}
 section[data-testid="stSidebar"] .stMarkdown p {{ color: #D1D5DB !important; }}
+
+/* Inputs y Selectores (CORREGIDO: fondo blanco y texto oscuro) */
+div[data-baseweb="input"] input, div[data-baseweb="textarea"] textarea {{
+    background-color: #FFFFFF !important;
+    color: {TEXT} !important;
+}}
+div[data-baseweb="select"] > div {{
+    background-color: #FFFFFF !important;
+    border-color: {BORDER} !important;
+}}
+div[data-baseweb="select"] span {{ color: {TEXT} !important; }}
+div[data-baseweb="popover"] ul li {{ color: {TEXT} !important; }}
 
 /* Enlaces del Sidebar */
 a[data-testid="stSidebarNavLink"] {{
@@ -104,7 +118,7 @@ a[data-testid="stSidebarNavLink"][aria-current="page"] span {{ color: #fff !impo
     margin-bottom: 20px;
 }}
 
-/* Tarjetas Técnicas */
+/* Tarjetas Técnicas (CORREGIDO: texto oscuro forzado) */
 .card {{
     background: #FFFFFF;
     border: 1px solid {BORDER};
@@ -112,8 +126,8 @@ a[data-testid="stSidebarNavLink"][aria-current="page"] span {{ color: #fff !impo
     padding: 16px 20px;
     margin-bottom: 12px;
 }}
+.card * {{ color: {TEXT} !important; }} /* Fuerza texto oscuro en toda la tarjeta */
 .card b.t {{ color: {TERRACOTA} !important; font-family: 'IBM Plex Mono', monospace; font-size: 0.85rem; text-transform: uppercase; }}
-.card p {{ margin: 4px 0 0 0; color: {TEXT} !important; }}
 
 /* Títulos de Sección */
 .sec {{
@@ -137,7 +151,7 @@ a[data-testid="stSidebarNavLink"][aria-current="page"] span {{ color: #fff !impo
     border-radius: 2px;
 }}
 
-/* Bloque Entender-Analizar-Proponer (Corregido texto) */
+/* Bloque Entender-Analizar-Proponer (CORREGIDO) */
 .eap {{
     background: #FFFFFF;
     border: 1px solid {BORDER};
@@ -208,15 +222,21 @@ a[data-testid="stSidebarNavLink"][aria-current="page"] span {{ color: #fff !impo
     border-radius: 3px;
 }}
 
-/* Botones y Filtros (Corrección de color) */
-button[data-baseweb="tab"] {{ font-family: 'IBM Plex Sans', sans-serif; font-weight: 500; color: {NAVY} !important; }}
-button[data-baseweb="tab"]:hover {{ color: {TERRACOTA} !important; }}
-div[data-baseweb="select"] > div {{ background-color: #FFFFFF !important; border-color: {BORDER} !important; }}
-div[data-baseweb="select"] span {{ color: {TEXT} !important; }}
-div[data-testid="stSegmentedControl"] button {{ background-color: #FFFFFF !important; border: 1px solid {BORDER} !important; color: {NAVY} !important; }}
-div[data-testid="stSegmentedControl"] button[aria-checked="true"] {{ background-color: {NAVY} !important; color: #FFF !important; border-color: {NAVY} !important; }}
-div[data-testid="stMultiSelect"] > div {{ background-color: #FFFFFF !important; }}
-div[data-testid="stMultiSelect"] span {{ color: {TEXT} !important; }}
+/* Botones y Filtros (CORREGIDO) */
+div[data-testid="stSegmentedControl"] button {{
+    background-color: #FFFFFF !important; 
+    border: 1px solid {BORDER} !important; 
+    color: {NAVY} !important;
+}}
+div[data-testid="stSegmentedControl"] button[aria-checked="true"] {{ 
+    background-color: {NAVY} !important; 
+    color: #FFF !important; 
+}}
+div[data-testid="stSegmentedControl"] button[aria-checked="false"]:hover {{ 
+    background-color: {PAPER} !important; 
+}}
+[data-baseweb="tab-list"] button span {{ color: {TEXT} !important; }}
+[data-baseweb="tab-list"] button[aria-selected="true"] span {{ color: {NAVY} !important; font-weight: 600; }}
 
 /* Textura de Fondo Sutil (Papel) */
 [data-testid="stAppViewContainer"] {{
@@ -357,7 +377,6 @@ def color_estado(v):
     c = {"Crítico": BRICK, "Pendiente": BRICK, "Atención": MUSTARD, "Lenta": MUSTARD, "Normal": TEAL, "Rápida": TEAL}.get(v)
     return f"background-color:{c};color:#FFF;font-weight:600" if c else ""
 
-# Corrección del Bug del KPI (Fuerza a float)
 def kpi_card(valor, titulo, rango=(0, 100), color=TERRACOTA, sufijo="%"):
     try:
         v_float = float(valor)
@@ -487,9 +506,25 @@ def analisis1():
         sec("Mapa de Cobertura Parcial")
         map_data = tq.dropna(subset=["estado"]).groupby("estado").size().reset_index(name="tanques")
         if not map_data.empty:
-            f_bar = px.bar(map_data.sort_values("tanques", ascending=True), x="tanques", y="estado", orientation="h", title="Tanques registrados por estado", labels={"tanques": "Cantidad de tanques", "estado": "Estado"})
-            f_bar.update_traces(marker_color=TERRACOTA)
-            st.plotly_chart(style(f_bar, 300), width="stretch")
+            try:
+                with open(BASE / "mexico.json", "r", encoding="utf-8") as f:
+                    mx_geo = json.load(f)
+                fig_map = px.choropleth(
+                    map_data, 
+                    geojson=mx_geo, 
+                    locations="estado", 
+                    featureidkey="properties.name", 
+                    color="tanques", 
+                    color_continuous_scale=["#F4F1EA", TERRACOTA],
+                    title="Cobertura de tanques por estado"
+                )
+                fig_map.update_geos(fitbounds="locations", visible=False)
+                st.plotly_chart(style(fig_map, 400), width="stretch")
+            except Exception as e:
+                st.warning("Cargando mapa... Si no aparece, asegúrate de que mexico.json esté en la carpeta.")
+                f_bar = px.bar(map_data.sort_values("tanques", ascending=True), x="tanques", y="estado", orientation="h")
+                f_bar.update_traces(marker_color=TERRACOTA)
+                st.plotly_chart(style(f_bar, 300), width="stretch")
         else:
             st.caption("Aún no hay datos de ubicación (latitud/longitud/estado) en la hoja Tanques.")
         
