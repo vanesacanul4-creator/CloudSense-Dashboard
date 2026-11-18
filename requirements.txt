@@ -3,3 +3,5 @@ pandas
 plotly>=5.24
 openpyxl
 segno
+folium
+streamlit-folium
