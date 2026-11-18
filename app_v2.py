@@ -1,5 +1,5 @@
-"""C.L.O.U.D. Sense - Tablero de control interactivo (Streamlit) - Versión Editorial v2.3.
-Correcciones: Sidebar azul y errores de sintaxis CSS."""
+"""C.L.O.U.D. Sense - Tablero de control interactivo (Streamlit) - Versión Editorial v2.4.
+Correcciones: Fondo del sidebar nativo, sintaxis de Python validada."""
 from pathlib import Path
 import numpy as np, pandas as pd, plotly.express as px, plotly.graph_objects as go, streamlit as st
 import json
@@ -25,7 +25,7 @@ ESTADO_COL = {"Crítico": BRICK, "Atención": MUSTARD, "Normal": TEAL, "Sin cons
 st.set_page_config(page_title="C.L.O.U.D. Sense", page_icon=str(ASSETS / "icono.png"), layout="wide", initial_sidebar_state="auto")
 st.logo(str(ASSETS / "logo_horizontal.png"), icon_image=str(ASSETS / "icono.png"), size="large")
 
-# CSS Editorial (Corregido)
+# CSS Editorial (Corregido y Simplificado)
 st.markdown(f"""<style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
 
@@ -40,37 +40,27 @@ h1, h2, h3, h4, h5 {{
 }}
 .block-container {{ padding-top: 2rem; padding-bottom: 2rem; max-width: 1400px; }}
 
-/* Ocultar barra superior SOLO en escritorio para mantener el diseño limpio */
+/* Ocultar barra superior SOLO en escritorio */
 @media (min-width: 768px) {{
     [data-testid="stToolbarActions"], [data-testid="stAppDeployButton"], [data-testid="stMainMenu"], [data-testid="stDecoration"], footer, [data-testid="stSidebarResizeHandle"] {{ display: none !important; }}
     header[data-testid="stHeader"] {{ background: transparent; }}
 }}
 
-/* Sidebar Azul Profundo (Corregido) */
+/* Sidebar: Azul Profundo con letras claras */
 section[data-testid="stSidebar"] {{
     background-color: {NAVY} !important;
-    border-right: 1px solid #0E2440;
 }}
+/* Forzar que TODO lo que esté dentro del sidebar sea claro y legible */
 section[data-testid="stSidebar"] * {{
     color: #F4F1EA !important;
 }}
-section[data-testid="stSidebar"] .stMarkdown p,
-section[data-testid="stSidebar"] label,
-section[data-testid="stSidebar"] .st-emotion-cache-1629p8f p {{
-    color: #D1D5DB !important;
+/* Quitar fondos blancos de los inputs y expanders en el sidebar */
+section[data-testid="stSidebar"] div[data-testid="stExpander"] details,
+section[data-testid="stSidebar"] div[data-testid="stFileUploaderDropzone"],
+section[data-testid="stSidebar"] input {{
+    background-color: #152E4A !important;
+    border-color: #2E5075 !important;
 }}
-
-/* Inputs y Selectores (CORREGIDO: fondo blanco y texto oscuro) */
-div[data-baseweb="input"] input, div[data-baseweb="textarea"] textarea {{
-    background-color: #FFFFFF !important;
-    color: {TEXT} !important;
-}}
-div[data-baseweb="select"] > div {{
-    background-color: #FFFFFF !important;
-    border-color: {BORDER} !important;
-}}
-div[data-baseweb="select"] span {{ color: {TEXT} !important; }}
-div[data-baseweb="popover"] ul li {{ color: {TEXT} !important; }}
 
 /* Enlaces del Sidebar */
 a[data-testid="stSidebarNavLink"] {{
@@ -124,7 +114,7 @@ a[data-testid="stSidebarNavLink"][aria-current="page"] span {{ color: #fff !impo
     margin-bottom: 20px;
 }}
 
-/* Tarjetas Técnicas (CORREGIDO: texto oscuro forzado) */
+/* Tarjetas Técnicas */
 .card {{
     background: #FFFFFF;
     border: 1px solid {BORDER};
@@ -132,7 +122,7 @@ a[data-testid="stSidebarNavLink"][aria-current="page"] span {{ color: #fff !impo
     padding: 16px 20px;
     margin-bottom: 12px;
 }}
-.card * {{ color: {TEXT} !important; }} /* Fuerza texto oscuro en toda la tarjeta */
+.card * {{ color: {TEXT} !important; }}
 .card b.t {{ color: {TERRACOTA} !important; font-family: 'IBM Plex Mono', monospace; font-size: 0.85rem; text-transform: uppercase; }}
 
 /* Títulos de Sección */
@@ -157,7 +147,7 @@ a[data-testid="stSidebarNavLink"][aria-current="page"] span {{ color: #fff !impo
     border-radius: 2px;
 }}
 
-/* Bloque Entender-Analizar-Proponer (CORREGIDO) */
+/* Bloque Entender-Analizar-Proponer */
 .eap {{
     background: #FFFFFF;
     border: 1px solid {BORDER};
@@ -190,7 +180,7 @@ a[data-testid="stSidebarNavLink"][aria-current="page"] span {{ color: #fff !impo
     font-weight: 600;
 }}
 
-/* KPI Card (Reemplazo de Gauges) */
+/* KPI Card */
 .kpi-card {{
     background: #FFFFFF;
     border: 1px solid {BORDER};
@@ -228,7 +218,7 @@ a[data-testid="stSidebarNavLink"][aria-current="page"] span {{ color: #fff !impo
     border-radius: 3px;
 }}
 
-/* Botones y Filtros (CORREGIDO) */
+/* Botones y Filtros (Main Content) */
 div[data-testid="stSegmentedControl"] button {{
     background-color: #FFFFFF !important; 
     border: 1px solid {BORDER} !important; 
@@ -237,9 +227,6 @@ div[data-testid="stSegmentedControl"] button {{
 div[data-testid="stSegmentedControl"] button[aria-checked="true"] {{ 
     background-color: {NAVY} !important; 
     color: #FFF !important; 
-}}
-div[data-testid="stSegmentedControl"] button[aria-checked="false"]:hover {{ 
-    background-color: {PAPER} !important; 
 }}
 [data-baseweb="tab-list"] button span {{ color: {TEXT} !important; }}
 [data-baseweb="tab-list"] button[aria-selected="true"] span {{ color: {NAVY} !important; font-weight: 600; }}
