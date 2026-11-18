@@ -1,5 +1,5 @@
-"""C.L.O.U.D. Sense - Tablero de control interactivo (Streamlit) - Versión Editorial v2.2.
-Correcciones: legibilidad de inputs, textos en tarjetas, menú móvil y mapa."""
+"""C.L.O.U.D. Sense - Tablero de control interactivo (Streamlit) - Versión Editorial v2.3.
+Correcciones: Sidebar azul y errores de sintaxis CSS."""
 from pathlib import Path
 import numpy as np, pandas as pd, plotly.express as px, plotly.graph_objects as go, streamlit as st
 import json
@@ -25,7 +25,7 @@ ESTADO_COL = {"Crítico": BRICK, "Atención": MUSTARD, "Normal": TEAL, "Sin cons
 st.set_page_config(page_title="C.L.O.U.D. Sense", page_icon=str(ASSETS / "icono.png"), layout="wide", initial_sidebar_state="auto")
 st.logo(str(ASSETS / "logo_horizontal.png"), icon_image=str(ASSETS / "icono.png"), size="large")
 
-# CSS Editorial (Corregido para inputs, textos y móvil)
+# CSS Editorial (Corregido)
 st.markdown(f"""<style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
 
@@ -46,21 +46,31 @@ h1, h2, h3, h4, h5 {{
     header[data-testid="stHeader"] {{ background: transparent; }}
 }}
 
-/* Sidebar Azul Profundo (Corregido para que no se vea blanco) */
-section[data-testid="stSidebar"] {
-    background-color: #1B3A5C !important;
+/* Sidebar Azul Profundo (Corregido) */
+section[data-testid="stSidebar"] {{
+    background-color: {NAVY} !important;
     border-right: 1px solid #0E2440;
-}
-/* Forzar letras blancas en toda la barra lateral */
-section[data-testid="stSidebar"] * {
+}}
+section[data-testid="stSidebar"] * {{
     color: #F4F1EA !important;
-}
-/* Arreglar específicamente los textos dentro de los expanders y labels */
+}}
 section[data-testid="stSidebar"] .stMarkdown p,
 section[data-testid="stSidebar"] label,
-section[data-testid="stSidebar"] .st-emotion-cache-1629p8f p {
+section[data-testid="stSidebar"] .st-emotion-cache-1629p8f p {{
     color: #D1D5DB !important;
-}
+}}
+
+/* Inputs y Selectores (CORREGIDO: fondo blanco y texto oscuro) */
+div[data-baseweb="input"] input, div[data-baseweb="textarea"] textarea {{
+    background-color: #FFFFFF !important;
+    color: {TEXT} !important;
+}}
+div[data-baseweb="select"] > div {{
+    background-color: #FFFFFF !important;
+    border-color: {BORDER} !important;
+}}
+div[data-baseweb="select"] span {{ color: {TEXT} !important; }}
+div[data-baseweb="popover"] ul li {{ color: {TEXT} !important; }}
 
 /* Enlaces del Sidebar */
 a[data-testid="stSidebarNavLink"] {{
