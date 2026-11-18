@@ -46,25 +46,21 @@ h1, h2, h3, h4, h5 {{
     header[data-testid="stHeader"] {{ background: transparent; }}
 }}
 
-/* Sidebar Azul Profundo */
-section[data-testid="stSidebar"] {{
-    background-color: {NAVY};
+/* Sidebar Azul Profundo (Corregido para que no se vea blanco) */
+section[data-testid="stSidebar"] {
+    background-color: #1B3A5C !important;
     border-right: 1px solid #0E2440;
-}}
-section[data-testid="stSidebar"] * {{ color: #F4F1EA !important; }}
-section[data-testid="stSidebar"] .stMarkdown p {{ color: #D1D5DB !important; }}
-
-/* Inputs y Selectores (CORREGIDO: fondo blanco y texto oscuro) */
-div[data-baseweb="input"] input, div[data-baseweb="textarea"] textarea {{
-    background-color: #FFFFFF !important;
-    color: {TEXT} !important;
-}}
-div[data-baseweb="select"] > div {{
-    background-color: #FFFFFF !important;
-    border-color: {BORDER} !important;
-}}
-div[data-baseweb="select"] span {{ color: {TEXT} !important; }}
-div[data-baseweb="popover"] ul li {{ color: {TEXT} !important; }}
+}
+/* Forzar letras blancas en toda la barra lateral */
+section[data-testid="stSidebar"] * {
+    color: #F4F1EA !important;
+}
+/* Arreglar específicamente los textos dentro de los expanders y labels */
+section[data-testid="stSidebar"] .stMarkdown p,
+section[data-testid="stSidebar"] label,
+section[data-testid="stSidebar"] .st-emotion-cache-1629p8f p {
+    color: #D1D5DB !important;
+}
 
 /* Enlaces del Sidebar */
 a[data-testid="stSidebarNavLink"] {{
