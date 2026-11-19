@@ -5,3 +5,5 @@ openpyxl
 segno
 folium
 streamlit-folium
+psycopg2-binary
+sqlalchemy
