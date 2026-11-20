@@ -313,6 +313,8 @@ def load_encuesta():
     d = pd.read_csv(p); return d[d.notna().sum(axis=1) >= 3].reset_index(drop=True)
 
 ENC = load_encuesta()
+import mineria
+MIN = mineria.cargar()
 
 with st.sidebar.expander("Opciones del tablero"):
     EXPLICA = st.toggle("Guía de lectura en cada gráfica", value=True, key="explica")
@@ -332,6 +334,7 @@ with st.sidebar.popover("Abrir en el celular", icon=":material/qr_code_2:", widt
         st.image(_b.getvalue(), width=220); st.caption("Escanea el código con la cámara del celular.")
     else: st.caption("Pega el enlace público del tablero y aquí aparecerá su código QR.")
 st.sidebar.caption("Fuente de datos: " + ("datos de ejemplo" if DEMO else ("Excel cargado" if up else "Plantilla_CloudSense.xlsx")))
+st.sidebar.caption("Minería: " + MIN["fuente"])
 
 # ------------------------------------------------------------------ utilidades
 def header(titulo, pregunta):
@@ -696,9 +699,14 @@ def decisiones():
         p6 = (ENC["pago_unico"] == "Menos de $600").sum() / max(ENC["pago_unico"].notna().sum(), 1)
         acc.append(("Atención" if p6 >= .4 else "Normal", "Validación de mercado", f"{pc_:.0%} lo compraría y {ut_:.0%} califica el aviso con 4 o 5; {p6:.0%} pagaría menos de $600 por el dispositivo."))
     
+    _pm = mineria.prioridad(MIN)
+    if _pm: acc.append(_pm)
+
     sec("Prioridades")
     for est, t, d in acc: st.markdown(f'<div class="card" style="border-left-color:{ESTADO_COL[est]}"><b style="color:{ESTADO_COL[est]}">{est.upper()}</b> &nbsp;·&nbsp; <b>{t}:</b> {d}</div>', unsafe_allow_html=True)
     
+    mineria.bloque(MIN, sec, kpi_card, style, eap, (NAVY, TERRACOTA, TEAL, MUSTARD, BRICK))
+
     sec("Plan de acción")
     plan = st.data_editor(pd.DataFrame({"Acción": ["Recargar tanques críticos", "Atender fugas pendientes", "Ajustar el umbral del MQ-6", "Reforzar zonas de mayor demanda"], "Responsable": ["", "", "", ""], "Hecho": [False] * 4}), hide_index=True, width="stretch")
     c1, c2, _ = st.columns([1, 1, 3]); c1.download_button("Descargar plan (CSV)", plan.to_csv(index=False).encode("utf-8-sig"), "plan_de_accion.csv", "text/csv", icon=":material/download:")

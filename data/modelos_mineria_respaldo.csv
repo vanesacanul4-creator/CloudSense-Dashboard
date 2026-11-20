@@ -1,0 +1,2 @@
+ejecucion_id,algoritmo,tecnica,variable_objetivo,exactitud,precision_pond,recall_pond,f1_pond,auc,n_entrenamiento,n_prueba,ejecutado_en,notas
+kNN_2026-11-19_01,kNN,Clasificación,clase,0.97437,0.97442,0.97437,0.97436,0.99708,5688,632,2026-11-19,"Orange 3.38.1; validación cruzada estratificada 10 pliegues; k=5, euclidiana"
