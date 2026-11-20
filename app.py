@@ -20,6 +20,7 @@ MUSTARD = "#C08A2E"
 BRICK = "#9B2C2C"
 TEXT = "#2B2B2B"
 MUTED = "#6B6B6B"
+px.defaults.color_discrete_sequence = [TERRACOTA, NAVY, MUSTARD, TEAL, BRICK, "#94A3B8"]
 
 ESTADO_COL = {"Crítico": BRICK, "Atención": MUSTARD, "Normal": TEAL, "Sin consumo": "#94A3B8"}
 
@@ -325,7 +326,7 @@ SENS, DE_DW = load_sensores()
 if INFO:
     with st.sidebar.expander("Datos cargados"):
         st.dataframe(pd.DataFrame(INFO), hide_index=True, width="stretch")
-PUBLIC_URL = ""
+PUBLIC_URL = "https://cloudsense-dashboars.streamlit.app/"
 with st.sidebar.popover("Abrir en el celular", icon=":material/qr_code_2:", width="stretch"):
     _url = st.text_input("Enlace público del tablero", value=PUBLIC_URL, placeholder="https://tu-tablero.streamlit.app")
     if _url.startswith("http"):
@@ -553,14 +554,13 @@ def analisis1():
         s = SENS.copy(); s["alerta"] = s["mq6"] >= u; pct = s["alerta"].mean()
         
         c1, c2, c3 = st.columns(3)
-        with c1: kpi_card(f"{len(s):,}", "Lecturas analizadas", color=NAVY)
-        with c2: kpi_card(f"{int(s['alerta'].sum()):,}", "Alertas generadas", color=BRICK)
+        with c1: kpi_card(f"{len(s):,}", "Lecturas analizadas", color=NAVY, sufijo="")
+        with c2: kpi_card(f"{int(s['alerta'].sum()):,}", "Alertas generadas", color=BRICK, sufijo="")
         with c3: kpi_card(f"{pct*100:.1f}", "Porcentaje en alerta", color=MUSTARD)
         
-        a, b = st.columns([1, 1.6])
         xs = np.arange(300, 701, 5); ys = [(s["mq6"] >= x).mean() * 100 for x in xs]
         fig = go.Figure(go.Scatter(x=xs, y=ys, mode="lines", line=dict(color=TERRACOTA, width=3), name="% en alerta")); fig.add_trace(go.Scatter(x=[u], y=[pct * 100], mode="markers", marker=dict(size=14, color=NAVY), name="Umbral elegido"))
-        b.plotly_chart(style(fig.update_layout(title="¿Qué pasa si subo o bajo el umbral?", xaxis_title="Umbral MQ-6", yaxis_title="% de lecturas en alerta"), 280), width="stretch")
+        st.plotly_chart(style(fig.update_layout(title="¿Qué pasa si subo o bajo el umbral?", xaxis_title="Umbral MQ-6", yaxis_title="% de lecturas en alerta"), 280), width="stretch")
         
         sec("La huella de cada gas")
         c1, c2 = st.columns(2)
@@ -570,7 +570,7 @@ def analisis1():
         c1.plotly_chart(style(hm, 360), width="stretch")
         with c2:
             sel = st.pills("Sensor a comparar", MQ, default="mq6", format_func=str.upper) or "mq6"
-            bx = px.box(s, x="clase", y=sel, color="clase", title=f"Distribución de {sel.upper()} por clase")
+            bx = px.box(s, x="clase", y=sel, color="clase", title=f"Distribución de {sel.upper()} por clase", labels={"clase": "Clase", sel: sel.upper()})
             if sel == "mq6": bx.add_hline(y=u, line_dash="dash", line_color=TERRACOTA, annotation_text="Umbral")
             st.plotly_chart(style(bx, 330), width="stretch")
     else:
@@ -643,7 +643,7 @@ def analisis3():
                     icon=folium.Icon(color=color, icon="warning-sign")
                 ).add_to(mf)
             with a: st_folium(mf, width="100%", height=440, returned_objects=[])
-        b.plotly_chart(style(px.bar(m.groupby(["zona", "tipo_cliente"], as_index=False).size(), x="zona", y="size", color="tipo_cliente", title="Fugas por zona y tipo de cliente"), 440), width="stretch")
+        b.plotly_chart(style(px.bar(m.groupby(["zona", "tipo_cliente"], as_index=False).size(), x="zona", y="size", color="tipo_cliente", title="Fugas por zona y tipo de cliente", labels={"size": "Fugas", "zona": "Zona", "tipo_cliente": "Tipo de cliente"}), 440), width="stretch")
     elif tab.startswith("Aten"):
         if fu.empty: vacio("Fugas", "el tiempo de respuesta y las fugas sin atender"); return
         k = st.columns(4); pend = int((fu["atendida"] == 0).sum())
@@ -651,14 +651,14 @@ def analisis3():
         a, b = st.columns([1.4, 1])
         v = fu.copy(); v["semáforo"] = np.where(v["atendida"] == 0, "Pendiente", np.where(v["tiempo_respuesta_min"] > 30, "Lenta", "Rápida"))
         a.dataframe(v.sort_values("fecha_hora", ascending=False)[["id_alerta", "id_tanque", "fecha_hora", "gravedad", "tiempo_respuesta_min", "semáforo"]].style.map(color_estado, subset=["semáforo"]), hide_index=True, height=380, width="stretch")
-        b.plotly_chart(style(px.histogram(fu, x="tiempo_respuesta_min", nbins=10, title="Distribución del tiempo de respuesta (min)"), 380), width="stretch")
+        b.plotly_chart(style(px.histogram(fu, x="tiempo_respuesta_min", nbins=10, title="Distribución del tiempo de respuesta (min)", labels={"tiempo_respuesta_min": "Minutos hasta atender", "count": "Alertas"}), 380), width="stretch")
     else:
         if pr.empty: vacio("Pruebas", "los resultados de los 30 ensayos por escenario"); return
         k = st.columns(4); k[0].metric("Ensayos", f"{len(pr)}/30"); k[1].metric("Respuesta media", f"{pr['tiempo_respuesta_s'].mean():.1f} s")
         k[2].metric("Latencia de aviso (mediana)", f"{pr['latencia_notificacion_s'].median():.1f} s"); k[3].metric("Alarma activada", f"{pr['alarma_activada'].mean():.0%}")
         a, b = st.columns(2)
-        a.plotly_chart(style(px.box(pr, x="escenario", y="tiempo_respuesta_s", color="escenario", points="all", title="Tiempo de respuesta por escenario (s)")), width="stretch")
-        fg = px.scatter(pr, x="concentracion_ppm", y="tiempo_respuesta_s", color="escenario", title="Concentración de gas vs. tiempo de respuesta"); q = pr.dropna(subset=["concentracion_ppm", "tiempo_respuesta_s"])
+        a.plotly_chart(style(px.box(pr, x="escenario", y="tiempo_respuesta_s", color="escenario", points="all", title="Tiempo de respuesta por escenario (s)", labels={"escenario": "Escenario", "tiempo_respuesta_s": "Segundos"})), width="stretch")
+        fg = px.scatter(pr, x="concentracion_ppm", y="tiempo_respuesta_s", color="escenario", title="Concentración de gas vs. tiempo de respuesta", labels={"concentracion_ppm": "Concentración (ppm)", "tiempo_respuesta_s": "Segundos", "escenario": "Escenario"}); q = pr.dropna(subset=["concentracion_ppm", "tiempo_respuesta_s"])
         if len(q) > 3 and q["concentracion_ppm"].nunique() > 1:
             bb, a0 = np.polyfit(q["concentracion_ppm"], q["tiempo_respuesta_s"], 1); xs = np.array([q["concentracion_ppm"].min(), q["concentracion_ppm"].max()])
             fg.add_trace(go.Scatter(x=xs, y=a0 + bb * xs, mode="lines", name="Tendencia", line=dict(color=TERRACOTA, dash="dash")))
