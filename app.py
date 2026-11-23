@@ -58,10 +58,11 @@ a[data-testid="stSidebarNavLink"][aria-current="page"] {{ background: {TERRACOTA
 a[data-testid="stSidebarNavLink"][aria-current="page"] span {{ color: #fff !important; font-weight: 600; }}
 
 /* Encabezado principal */
-.hdr {{ background: #FFFFFF; border-radius: 6px; padding: 24px 28px; margin-bottom: 24px; border-bottom: 4px solid {TERRACOTA}; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; flex-direction: column; }}
-.hdr .tag {{ font-size: 0.72rem; letter-spacing: 0.14em; color: {MUTED} !important; font-weight: 600; text-transform: uppercase; margin-bottom: 6px; }}
-.hdr h1 {{ margin: 0; font-size: 2.2rem; color: {NAVY} !important; padding: 0; line-height: 1.15; font-weight: 700 !important; }}
-.hdr p {{ margin: 8px 0 0 0; color: {MUTED} !important; font-size: 1.05rem; }}
+.hdr {{ background: transparent; padding: 6px 0 4px 0; margin-bottom: 18px; display: flex; flex-direction: column; }}
+.hdr .tag {{ font-size: 0.74rem; letter-spacing: 0.18em; color: {TERRACOTA} !important; font-weight: 700; text-transform: uppercase; margin-bottom: 8px; display: flex; align-items: center; gap: 9px; }}
+.hdr .tag::before {{ content: ""; width: 9px; height: 9px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); background: {TERRACOTA}; display: inline-block; }}
+.hdr h1 {{ margin: 0; font-size: 2.5rem; color: {NAVY} !important; padding: 0; line-height: 1.1; font-weight: 700 !important; letter-spacing: -0.015em; }}
+.hdr p {{ margin: 10px 0 0 0; color: {MUTED} !important; font-size: 1.1rem; max-width: 780px; }}
 .demo {{ background: #FFF3E0; color: #B45F06 !important; font-size: 0.8rem; border-left: 4px solid #B45F06; padding: 8px 16px; margin-bottom: 20px; }}
 
 /* Tarjetas y notas */
@@ -71,8 +72,7 @@ a[data-testid="stSidebarNavLink"][aria-current="page"] span {{ color: #fff !impo
 .nota b {{ color: {NAVY} !important; }}
 
 /* Títulos de sección */
-.sec {{ font-size: 1.35rem; font-weight: 600; margin: 34px 0 16px 0; color: {NAVY} !important; display: flex; align-items: center; border-bottom: 1px solid {BORDER}; padding-bottom: 8px; }}
-.sec span {{ font-size: 0.85rem; font-weight: 600; color: {TERRACOTA} !important; margin-right: 12px; background: #FFF; border: 1px solid {BORDER}; padding: 2px 8px; border-radius: 4px; font-variant-numeric: tabular-nums; }}
+.sec {{ font-size: 1.4rem; font-weight: 700; margin: 42px 0 14px 0; color: {NAVY} !important; letter-spacing: -0.01em; }}
 
 /* Métricas nativas */
 [data-testid="stMetric"] {{ background: #FFFFFF; border: 1px solid {BORDER}; border-radius: 6px; padding: 16px; }}
@@ -295,8 +295,7 @@ def header(titulo, pregunta):
 
 _sec_num = [0]
 def sec(t):
-    _sec_num[0] += 1
-    st.markdown(f'<div class="sec"><span>{_sec_num[0]:02d}</span>{t}</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="sec">{t}</div>', unsafe_allow_html=True)
 
 def como_leer(t):
     if EXPLICA: st.caption(f"Cómo leerlo: {t}")
@@ -335,8 +334,8 @@ def eap(e, a, p):
     """Guía de lectura interactiva: tres opciones y el texto cambia según la que se toque."""
     k = "g_" + hashlib.md5(e.encode("utf-8")).hexdigest()[:10]
     st.markdown('<div class="guia-h">Guía rápida de esta sección</div>', unsafe_allow_html=True)
-    op = st.pills("Guía", ["Qué estoy viendo", "Qué me dice", "Qué puedo hacer"], key=k, label_visibility="collapsed")
-    txt = {"Qué estoy viendo": e, "Qué me dice": a, "Qué puedo hacer": p}.get(op)
+    op = st.pills("Guía", ["¿Qué estoy viendo?", "¿Qué me dice?", "¿Qué puedo hacer?"], key=k, label_visibility="collapsed")
+    txt = {"¿Qué estoy viendo?": e, "¿Qué me dice?": a, "¿Qué puedo hacer?": p}.get(op)
     if txt: st.markdown(f'<div class="guia-b">{txt}</div>', unsafe_allow_html=True)
     else: st.caption("Toca una de las tres opciones para leer la explicación.")
 
