@@ -340,6 +340,11 @@ _sec_num = [0]
 def sec(t):
     st.markdown(f'<div class="sec">{t}</div>', unsafe_allow_html=True)
 
+def ficha(titulo, filas, color="#112A46"):
+    """Ventanita del mapa: título y datos en filas ordenadas (etiqueta a la izquierda, dato a la derecha)."""
+    f = "".join(f'<tr><td style="color:#557392;padding:3px 14px 3px 0;white-space:nowrap">{k}</td><td style="font-weight:600;color:#112A46;padding:3px 0">{v}</td></tr>' for k, v in filas)
+    return folium.Popup(f'<div style="font-family:IBM Plex Sans,Arial,sans-serif;font-size:13px;min-width:230px"><div style="font-weight:700;font-size:14px;color:{color};border-bottom:1px solid #C4D2E1;padding-bottom:6px;margin-bottom:4px">{titulo}</div><table style="border-collapse:collapse">{f}</table></div>', max_width=320)
+
 def como_leer(t):
     if EXPLICA: st.caption(f"Cómo leerlo: {t}")
 
@@ -541,7 +546,9 @@ def analisis1():
                 
                 folium.Marker(
                     [row['latitud'], row['longitud']],
-                    popup=f"Tanque: {row['id_tanque']}<br>Cliente: {row['cliente']}<br>Zona: {row['zona']}",
+                    popup=ficha(f"Tanque {row['id_tanque']}", [("Propietario", str(row['cliente']).split(" · ")[0]), ("Nombre del tanque", (str(row['cliente']).split(" · ") + ["—"])[1]),
+                                                              ("Capacidad", f"{row['capacidad_kg']:.0f} kg" if pd.notna(row['capacidad_kg']) else "—"), ("Zona", row['zona']),
+                                                              ("Estado", "Alerta sin atender" if row['id_tanque'] in pendientes else "Sin alertas pendientes")]),
                     icon=folium.Icon(color=color_punto, icon="info-sign")
                 ).add_to(m)
             
@@ -681,7 +688,8 @@ def analisis3():
                 color = "red" if row['gravedad'] == "Alta" else ("orange" if row['gravedad'] == "Media" else "green")
                 folium.Marker(
                     [row['latitud'], row['longitud']],
-                    popup=f"Alerta: {row['id_alerta']}<br>Tanque: {row['id_tanque']}<br>Gravedad: {row['gravedad']}",
+                    popup=ficha(f"Alerta {row['id_alerta']}", [("Tanque", row['id_tanque']), ("Propietario", str(row.get('cliente', '—')).split(" · ")[0]), ("Gravedad", row['gravedad']),
+                                                             ("Fecha", row['fecha_hora'].strftime("%d/%m/%Y %H:%M") if pd.notna(row['fecha_hora']) else "—"), ("Atención", "Atendida" if row['atendida'] == 1 else "Pendiente")]),
                     icon=folium.Icon(color=color, icon="warning-sign")
                 ).add_to(mf)
             with a: st_folium(mf, width="100%", height=440, returned_objects=[]); a.caption("Cómo leerlo: cada pin es una alerta. Rojo = gravedad alta, naranja = media, verde = leve.")
