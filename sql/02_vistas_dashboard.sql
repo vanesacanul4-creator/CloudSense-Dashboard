@@ -50,8 +50,8 @@ SELECT al.id::text                                                           AS 
        NULL::float8                                                          AS caida_peso_pct,
        (EXTRACT(EPOCH FROM (COALESCE(al.resolved_at, al.attended_at, al.dismissed_at) - al.triggered_at)) / 60.0)::float8 AS duracion_min,
        NULL::float8                                                          AS kg_perdidos_estimados,
-       (EXTRACT(EPOCH FROM (COALESCE(al.attended_at, al.resolved_at) - al.triggered_at)) / 60.0)::float8 AS tiempo_respuesta_min,
-       CASE WHEN al.attended_at IS NOT NULL OR al.resolved_at IS NOT NULL THEN 1 ELSE 0 END AS atendida,
+       (EXTRACT(EPOCH FROM (COALESCE(al.attended_at, al.resolved_at, al.dismissed_at) - al.triggered_at)) / 60.0)::float8 AS tiempo_respuesta_min,
+       CASE WHEN al.attended_at IS NOT NULL OR al.resolved_at IS NOT NULL OR al.dismissed_at IS NOT NULL OR lower(al.status) IN ('resolved','dismissed','attended','closed','cerrada','resuelta') THEN 1 ELSE 0 END AS atendida,
        CASE WHEN lower(al.severity) IN ('low','leve','info','baja')                    THEN 'Leve'
             WHEN lower(al.severity) IN ('medium','media','warning','moderate','moderada') THEN 'Media'
             WHEN lower(al.severity) IN ('high','alta','critical','critica','crítica','severe') THEN 'Alta'
