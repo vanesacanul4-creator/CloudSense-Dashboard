@@ -22,7 +22,7 @@ else:      # día: azules fríos con naranja llama como acento
     NAVY, TEXT, MUTED = "#112A46", "#14233A", "#557392"
     SIDEBG, HDR1, HDR2, ACT, BACKF, SIDELINE = "#0A1B2E", "#0F2744", "#1F5FA8", "#1C5FB8", "#112A46", "#1B3B5A"
     TERRACOTA, MUSTARD, TEAL, BRICK, BLUE = "#F26A1B", "#E58A00", "#0FA38F", "#E5242B", "#2F80ED"
-TILES = "CartoDB dark_matter" if DARK else "OpenStreetMap"
+MAPKW = dict(tiles="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", attr="© OpenStreetMap contributors © CARTO") if DARK else dict(tiles="OpenStreetMap")
 px.defaults.color_discrete_sequence = [TERRACOTA, BLUE, MUSTARD, TEAL, BRICK, "#7A8CA6"]
 
 ESTADO_COL = {"Crítico": BRICK, "Atención": MUSTARD, "Normal": TEAL, "Sin consumo": "#94A3B8"}
@@ -63,6 +63,11 @@ a[data-testid="stSidebarNavLink"] span {{ font-size: 0.92rem; font-weight: 400; 
 a[data-testid="stSidebarNavLink"]:hover {{ background: {SIDELINE}; padding-left: 1rem; }}
 a[data-testid="stSidebarNavLink"][aria-current="page"] {{ background: {TERRACOTA}; border-bottom: 1px solid {TERRACOTA}; }}
 a[data-testid="stSidebarNavLink"][aria-current="page"] span {{ color: #fff !important; font-weight: 600; }}
+
+section[data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"] {{ background: rgba(255,255,255,.06) !important; border: 1px dashed #3F6A99 !important; border-radius: 3px !important; }}
+section[data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"] * {{ color: #C4D2E1 !important; }}
+section[data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"] button {{ background: transparent !important; border: 1px solid #5B7FA3 !important; border-radius: 3px !important; }}
+section[data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"] button * {{ color: #EAF1F8 !important; }}
 
 /* Encabezado de cada página: franja azul con el título en blanco */
 .hdr {{ background: linear-gradient(105deg, {HDR1} 0%, {HDR2} 100%); border-radius: 3px; padding: 30px 36px 28px; margin: 0 0 30px; display: flex; flex-direction: column; position: relative; overflow: hidden; }}
@@ -524,7 +529,7 @@ def analisis1():
         # MAPA DE FOLIUM (Calles reales de Tizimín)
         if not tq.dropna(subset=['latitud', 'longitud']).empty:
             # Centro en Tizimín
-            m = folium.Map(location=[21.143, -88.15], zoom_start=13, tiles=TILES)
+            m = folium.Map(location=[21.143, -88.15], zoom_start=13, **MAPKW)
             _encuadre(m, tq)
             pendientes = set(D["Fugas"].loc[D["Fugas"]["atendida"] == 0, "id_tanque"])
             
@@ -667,7 +672,7 @@ def analisis3():
         a, b = st.columns([1.6, 1]); ll = m.dropna(subset=["latitud", "longitud"])
         if len(ll):
             # Mapa de fugas con Folium
-            mf = folium.Map(location=[21.143, -88.15], zoom_start=13, tiles=TILES)
+            mf = folium.Map(location=[21.143, -88.15], zoom_start=13, **MAPKW)
             _encuadre(mf, ll)
             for _, row in ll.iterrows():
                 color = "red" if row['gravedad'] == "Alta" else ("orange" if row['gravedad'] == "Media" else "green")
