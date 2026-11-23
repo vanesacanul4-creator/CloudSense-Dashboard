@@ -23,7 +23,14 @@ else:      # día: azules fríos con naranja llama como acento
     SIDEBG, HDR1, HDR2, ACT, BACKF, SIDELINE = "#0A1B2E", "#0F2744", "#1F5FA8", "#1C5FB8", "#112A46", "#1B3B5A"
     TERRACOTA, MUSTARD, TEAL, BRICK, BLUE = "#F26A1B", "#E58A00", "#0FA38F", "#E5242B", "#2F80ED"
 MAPKW = dict(tiles="OpenStreetMap")
-MAPCSS = "<style>.leaflet-tile-pane{filter:invert(1) hue-rotate(195deg) brightness(.9) contrast(.95) saturate(.8);}.leaflet-container{background:#0A1B2E;}</style>" if DARK else ""
+_POP = ("<style>.leaflet-popup-content-wrapper{border-radius:2px;padding:0;overflow:hidden;box-shadow:0 8px 24px rgba(10,27,46,.35);background:%s}.leaflet-popup-content{margin:0;width:250px!important;font-family:'IBM Plex Sans',Arial,sans-serif}"
+        ".leaflet-popup-tip{background:%s}.leaflet-container a.leaflet-popup-close-button{color:#C4D2E1;top:7px;right:6px}"
+        ".fh{background:#0F2744;color:#fff;padding:11px 34px 10px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px}"
+        ".fh small{display:block;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:#9FB6D1;margin-bottom:1px}.fh strong{font-size:16px;font-weight:700;letter-spacing:.01em}"
+        ".fh em{font-style:normal;font-size:9.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#fff;padding:3px 8px;border-radius:2px;white-space:nowrap}"
+        ".fg{display:grid;grid-template-columns:1fr 1fr;gap:0}.fc{padding:9px 14px;border-top:1px solid %s}.fc:nth-child(odd){border-right:1px solid %s}"
+        ".fc span{display:block;font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:%s;margin-bottom:2px}.fc b{font-size:12.5px;font-weight:600;color:%s;white-space:nowrap}</style>")
+MAPCSS = _POP % (("#112A46", "#112A46", "#2B3E5C", "#2B3E5C", "#8FA3BC", "#E3E9F1") if DARK else ("#FFFFFF", "#FFFFFF", "#E1E8F0", "#E1E8F0", "#557392", "#112A46")) + ("<style>.leaflet-tile-pane{filter:invert(1) hue-rotate(195deg) brightness(.9) contrast(.95) saturate(.8);}.leaflet-container{background:#0A1B2E;}</style>" if DARK else "")
 px.defaults.color_discrete_sequence = [TERRACOTA, BLUE, MUSTARD, TEAL, BRICK, "#7A8CA6"]
 
 ESTADO_COL = {"Crítico": BRICK, "Atención": MUSTARD, "Normal": TEAL, "Sin consumo": "#94A3B8"}
@@ -340,10 +347,10 @@ _sec_num = [0]
 def sec(t):
     st.markdown(f'<div class="sec">{t}</div>', unsafe_allow_html=True)
 
-def ficha(titulo, filas, color="#112A46"):
-    """Ventanita del mapa: título y datos en filas ordenadas (etiqueta a la izquierda, dato a la derecha)."""
-    f = "".join(f'<tr><td style="color:#557392;padding:3px 14px 3px 0;white-space:nowrap">{k}</td><td style="font-weight:600;color:#112A46;padding:3px 0">{v}</td></tr>' for k, v in filas)
-    return folium.Popup(f'<div style="font-family:IBM Plex Sans,Arial,sans-serif;font-size:13px;min-width:230px"><div style="font-weight:700;font-size:14px;color:{color};border-bottom:1px solid #C4D2E1;padding-bottom:6px;margin-bottom:4px">{titulo}</div><table style="border-collapse:collapse">{f}</table></div>', max_width=320)
+def ficha(tipo, ident, etiqueta, color_etq, celdas):
+    """Ficha técnica del mapa: franja azul con el identificador y el estado, y debajo los datos en cuadrícula."""
+    cel = "".join(f'<div class="fc"><span>{k}</span><b>{v}</b></div>' for k, v in celdas)
+    return folium.Popup(f'<div class="fh"><div><small>{tipo}</small><strong>{ident}</strong></div><em style="background:{color_etq}">{etiqueta}</em></div><div class="fg">{cel}</div>', max_width=300)
 
 def como_leer(t):
     if EXPLICA: st.caption(f"Cómo leerlo: {t}")
@@ -546,9 +553,9 @@ def analisis1():
                 
                 folium.Marker(
                     [row['latitud'], row['longitud']],
-                    popup=ficha(f"Tanque {row['id_tanque']}", [("Propietario", str(row['cliente']).split(" · ")[0]), ("Nombre del tanque", (str(row['cliente']).split(" · ") + ["—"])[1]),
-                                                              ("Capacidad", f"{row['capacidad_kg']:.0f} kg" if pd.notna(row['capacidad_kg']) else "—"), ("Zona", row['zona']),
-                                                              ("Estado", "Alerta sin atender" if row['id_tanque'] in pendientes else "Sin alertas pendientes")]),
+                    popup=ficha("Tanque", row['id_tanque'], "Alerta" if row['id_tanque'] in pendientes else "Normal", "#E5242B" if row['id_tanque'] in pendientes else "#0FA38F",
+                                [("Propietario", str(row['cliente']).split(" · ")[0]), ("Nombre", (str(row['cliente']).split(" · ") + ["—"])[1]),
+                                 ("Capacidad", f"{row['capacidad_kg']:.0f} kg" if pd.notna(row['capacidad_kg']) else "—"), ("Zona", row['zona'])]),
                     icon=folium.Icon(color=color_punto, icon="info-sign")
                 ).add_to(m)
             
@@ -688,8 +695,9 @@ def analisis3():
                 color = "red" if row['gravedad'] == "Alta" else ("orange" if row['gravedad'] == "Media" else "green")
                 folium.Marker(
                     [row['latitud'], row['longitud']],
-                    popup=ficha(f"Alerta {row['id_alerta']}", [("Tanque", row['id_tanque']), ("Propietario", str(row.get('cliente', '—')).split(" · ")[0]), ("Gravedad", row['gravedad']),
-                                                             ("Fecha", row['fecha_hora'].strftime("%d/%m/%Y %H:%M") if pd.notna(row['fecha_hora']) else "—"), ("Atención", "Atendida" if row['atendida'] == 1 else "Pendiente")]),
+                    popup=ficha("Alerta", row['id_alerta'], row['gravedad'], {"Alta": "#E5242B", "Media": "#E58A00"}.get(row['gravedad'], "#0FA38F"),
+                                [("Tanque", row['id_tanque']), ("Propietario", str(row.get('cliente', '—')).split(" · ")[0]),
+                                 ("Fecha", row['fecha_hora'].strftime("%d/%m/%Y %H:%M") if pd.notna(row['fecha_hora']) else "—"), ("Atención", "Atendida" if row['atendida'] == 1 else "Pendiente")]),
                     icon=folium.Icon(color=color, icon="warning-sign")
                 ).add_to(mf)
             with a: st_folium(mf, width="100%", height=440, returned_objects=[]); a.caption("Cómo leerlo: cada pin es una alerta. Rojo = gravedad alta, naranja = media, verde = leve.")
