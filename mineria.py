@@ -99,10 +99,19 @@ def bloque(M, sec, kpi_card, style, eap, colores):
 
     if len(a["pares"]):
         t = a["pares"].reset_index(); t.columns = ["Clase real", "Predicha como", "Lecturas"]
-        st.markdown("**Dónde se equivoca el modelo**"); st.dataframe(t, hide_index=True, width="stretch")
+        st.markdown("**Dónde se equivoca el modelo**"); tabla(t)
     with st.expander("Corridas registradas en la bodega"):
-        st.dataframe(M["modelos"], hide_index=True, width="stretch")
+        tabla(M["modelos"])
     peor = a["rec"].idxmin()
     eap(f"El modelo {m['algoritmo']} clasifica el tipo de lectura de la matriz de sensores MQ con {exa:.1%} de exactitud.",
         f"La clase más difícil es {peor} (recall {a['rec'].min():.1%}); " + ("las demás se detectan casi sin error." if a["rec"].drop(peor).min() >= .99 else "revisar también el resto de clases."),
         "Usar el modelo para filtrar falsas alarmas y reforzar con más muestras de la clase que más se confunde.")
+
+
+def tabla(datos, destino=None):
+    """Tabla: nativa de día; en modo noche se dibuja como HTML para que respete los colores oscuros."""
+    d = destino or st
+    if not st.session_state.get("modo_noche", False):
+        d.dataframe(datos, hide_index=True, width="stretch", **({"height": 420} if hasattr(datos, "data") else {})); return
+    sty = datos if hasattr(datos, "to_html") and hasattr(datos, "data") else datos.style
+    d.markdown('<div class="tbl-w">' + sty.hide(axis="index").to_html() + '</div>', unsafe_allow_html=True)

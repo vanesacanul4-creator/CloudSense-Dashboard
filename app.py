@@ -10,16 +10,21 @@ px.defaults.template = 'plotly_white'
 BASE = Path(__file__).parent
 ASSETS, DATA = BASE / "assets", BASE / "data"
 
-# Paleta Editorial
-PAPER = "#F4F1EA"
-BORDER = "#DDD6C8"
-NAVY = "#1B3A5C"
+# Paleta Editorial (día / noche)
+DARK = bool(st.session_state.get("modo_noche", False))
+if DARK:
+    PAPER, SURF, SURF2, BORDER = "#0D1624", "#15233A", "#1B2D49", "#2B3E5C"
+    NAVY, TEXT, MUTED = "#9CC0E8", "#E3E9F1", "#9FB0C6"
+    SIDEBG, HDR1, HDR2, ACT, BACKF = "#09111D", "#14294A", "#1E3A63", "#3D6EA8", "#1F3A63"
+else:
+    PAPER, SURF, SURF2, BORDER = "#F4F1EA", "#FFFFFF", "#EBE6DA", "#DDD6C8"
+    NAVY, TEXT, MUTED = "#1B3A5C", "#2B2B2B", "#6B6B6B"
+    SIDEBG, HDR1, HDR2, ACT, BACKF = "#1B3A5C", "#1B3A5C", "#27527E", "#1B3A5C", "#1B3A5C"
 TERRACOTA = "#C05A2B"
 TEAL = "#4A8B9E"
 MUSTARD = "#C08A2E"
-BRICK = "#9B2C2C"
-TEXT = "#2B2B2B"
-MUTED = "#6B6B6B"
+BRICK = "#9B2C2C" if not DARK else "#D66A6A"
+TILES = "CartoDB dark_matter" if DARK else "OpenStreetMap"
 px.defaults.color_discrete_sequence = [TERRACOTA, NAVY, MUSTARD, TEAL, BRICK, "#94A3B8"]
 
 ESTADO_COL = {"Crítico": BRICK, "Atención": MUSTARD, "Normal": TEAL, "Sin consumo": "#94A3B8"}
@@ -27,123 +32,146 @@ ESTADO_COL = {"Crítico": BRICK, "Atención": MUSTARD, "Normal": TEAL, "Sin cons
 st.set_page_config(page_title="C.L.O.U.D. Sense", page_icon=str(ASSETS / "icono.png"), layout="wide", initial_sidebar_state="auto")
 st.logo(str(ASSETS / "logo_horizontal.png"), icon_image=str(ASSETS / "icono.png"), size="large")
 
-# CSS Editorial · una sola familia tipográfica (IBM Plex Sans) para todo el tablero
+# CSS Editorial · una sola familia tipográfica (IBM Plex Sans) · modo día / noche
 st.markdown(f"""<style>
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
 
 .stApp, .stApp * {{ font-family: 'IBM Plex Sans', system-ui, sans-serif !important; }}
 .stApp [data-testid="stIconMaterial"], .stApp [class*="material-symbols"] {{ font-family: 'Material Symbols Rounded', 'Material Symbols Outlined' !important; }}
-html, body, p, label, li, td, th, input, textarea, a {{ color: {TEXT}; }}
+html, body, .stApp {{ color: {TEXT}; }}
+[data-testid="stMain"] p, [data-testid="stMain"] label, [data-testid="stMain"] li, [data-testid="stMain"] td, [data-testid="stMain"] th, [data-testid="stMain"] [data-testid="stWidgetLabel"] * {{ color: {TEXT}; }}
+[data-testid="stCaptionContainer"], [data-testid="stCaptionContainer"] * {{ color: {MUTED} !important; }}
 h1, h2, h3, h4, h5 {{ color: {NAVY} !important; font-weight: 600 !important; letter-spacing: -0.01em; }}
 .block-container {{ padding-top: 2rem; padding-bottom: 2rem; max-width: 1400px; }}
+[data-testid="stAppViewContainer"], [data-testid="stApp"], .stApp {{ background-color: {PAPER}; }}
+header[data-testid="stHeader"] {{ background: transparent; }}
 
 /* Ocultar barra superior SOLO en escritorio */
 @media (min-width: 768px) {{
     [data-testid="stToolbarActions"], [data-testid="stAppDeployButton"], [data-testid="stMainMenu"], [data-testid="stDecoration"], footer, [data-testid="stSidebarResizeHandle"] {{ display: none !important; }}
-    header[data-testid="stHeader"] {{ background: transparent; }}
 }}
 
-/* Sidebar Azul Profundo */
-section[data-testid="stSidebar"] {{ background-color: {NAVY} !important; }}
+/* Barra lateral */
+section[data-testid="stSidebar"] {{ background-color: {SIDEBG} !important; }}
 section[data-testid="stSidebar"] * {{ color: #F4F1EA !important; }}
+section[data-testid="stSidebar"] [data-testid="stCaptionContainer"] * {{ color: #AFC2D8 !important; }}
 section[data-testid="stSidebar"] div[data-testid="stExpander"] {{ border: none !important; background-color: transparent !important; }}
 section[data-testid="stSidebar"] div[data-testid="stExpander"] summary {{ background-color: transparent !important; border-bottom: 1px solid #2E5075; }}
 section[data-testid="stSidebar"] div[data-testid="stExpander"] div[role="region"] {{ background-color: transparent !important; }}
-
-/* Enlaces del Sidebar */
+section[data-testid="stSidebar"] [data-testid="stPopover"] > div > button, section[data-testid="stSidebar"] [data-testid="stPopover"] button {{ background: transparent !important; border: 1px solid #5B7FA3 !important; border-radius: 3px !important; }}
+section[data-testid="stSidebar"] [data-testid="stPopover"] button * {{ color: #F4F1EA !important; }}
 a[data-testid="stSidebarNavLink"] {{ background: transparent; border: 1px solid transparent; border-radius: 0px; padding: 0.75rem 0.5rem; margin-bottom: 0.2rem; border-bottom: 1px solid #2E5075; transition: all 0.2s; }}
 a[data-testid="stSidebarNavLink"] span {{ font-size: 0.92rem; font-weight: 400; color: #D1D5DB !important; }}
 a[data-testid="stSidebarNavLink"]:hover {{ background: #24486B; padding-left: 1rem; }}
 a[data-testid="stSidebarNavLink"][aria-current="page"] {{ background: {TERRACOTA}; border-bottom: 1px solid {TERRACOTA}; }}
 a[data-testid="stSidebarNavLink"][aria-current="page"] span {{ color: #fff !important; font-weight: 600; }}
 
-/* Encabezado principal */
-.hdr {{ background: transparent; padding: 6px 0 4px 0; margin-bottom: 18px; display: flex; flex-direction: column; }}
-.hdr .tag {{ font-size: 0.74rem; letter-spacing: 0.18em; color: {TERRACOTA} !important; font-weight: 700; text-transform: uppercase; margin-bottom: 8px; display: flex; align-items: center; gap: 9px; }}
-.hdr .tag::before {{ content: ""; width: 9px; height: 9px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); background: {TERRACOTA}; display: inline-block; }}
-.hdr h1 {{ margin: 0; font-size: 2.5rem; color: {NAVY} !important; padding: 0; line-height: 1.1; font-weight: 700 !important; letter-spacing: -0.015em; }}
-.hdr p {{ margin: 10px 0 0 0; color: {MUTED} !important; font-size: 1.1rem; max-width: 780px; }}
+/* Encabezado de cada página: franja azul con el título en blanco */
+.hdr {{ background: linear-gradient(105deg, {HDR1} 0%, {HDR2} 100%); border-radius: 3px; padding: 30px 36px 28px; margin: 0 0 30px; display: flex; flex-direction: column; position: relative; overflow: hidden; }}
+.hdr::after {{ content: ""; position: absolute; right: -40px; top: -60px; width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, rgba(192,90,43,.45) 0%, rgba(192,90,43,0) 68%); }}
+.hdr h1 {{ margin: 0; font-size: 2.35rem; color: #FFFFFF !important; padding: 0; line-height: 1.12; font-weight: 700 !important; letter-spacing: -0.015em; position: relative; z-index: 1; }}
+.hdr p {{ margin: 10px 0 0 0; color: #C9D8EA !important; font-size: 1.05rem; max-width: 820px; position: relative; z-index: 1; }}
+@media (max-width: 768px) {{ .hdr {{ padding: 22px 20px; }} .hdr h1 {{ font-size: 1.7rem; }} .hdr p {{ font-size: .95rem; }} }}
 .demo {{ background: #FFF3E0; color: #B45F06 !important; font-size: 0.8rem; border-left: 4px solid #B45F06; padding: 8px 16px; margin-bottom: 20px; }}
 
-/* Tarjetas y notas */
-.card {{ background: #FFFFFF; border: 1px solid {BORDER}; border-radius: 6px; padding: 16px 20px; margin-bottom: 12px; }}
-.card * {{ color: {TEXT} !important; }}
-.nota {{ background: #FFFFFF; border: 1px solid {BORDER}; border-left: 4px solid {MUSTARD}; border-radius: 6px; padding: 14px 18px; font-size: 0.95rem; margin-bottom: 10px; }}
+/* Notas y títulos de sección */
+.nota {{ background: {SURF2}; border-radius: 3px; padding: 14px 18px; font-size: 0.95rem; margin-bottom: 12px; }}
+.nota, .nota * {{ color: {TEXT} !important; }}
 .nota b {{ color: {NAVY} !important; }}
+.sec {{ font-size: 1.4rem; font-weight: 700; margin: 40px 0 14px 0; color: {NAVY} !important; letter-spacing: -0.01em; }}
 
-/* Títulos de sección */
-.sec {{ font-size: 1.4rem; font-weight: 700; margin: 42px 0 14px 0; color: {NAVY} !important; letter-spacing: -0.01em; }}
+[data-testid="stMetric"] {{ background: {SURF}; border: 1px solid {BORDER}; border-radius: 3px; padding: 16px; }}
+[data-testid="stMetricLabel"] * {{ color: {MUTED} !important; font-size: 0.85rem; }}
+[data-testid="stMetricValue"] * {{ color: {NAVY} !important; font-weight: 700; font-variant-numeric: tabular-nums; }}
 
-/* Métricas nativas */
-[data-testid="stMetric"] {{ background: #FFFFFF; border: 1px solid {BORDER}; border-radius: 6px; padding: 16px; }}
-[data-testid="stMetricLabel"] {{ color: {MUTED} !important; font-size: 0.85rem; }}
-[data-testid="stMetricValue"] {{ color: {NAVY} !important; font-weight: 700; font-variant-numeric: tabular-nums; }}
-
-/* Tarjetas de indicador que giran: por delante el dato, por detrás qué significa */
-.flip {{ perspective: 1000px; height: 150px; margin-bottom: 10px; outline: none; }}
+/* Indicadores: por delante el dato, por detrás qué significa */
+.flip {{ perspective: 1000px; height: 142px; margin-bottom: 10px; outline: none; }}
 .flip-in {{ position: relative; width: 100%; height: 100%; transition: transform .55s cubic-bezier(.4,.2,.2,1); transform-style: preserve-3d; }}
 .flip:hover .flip-in, .flip:focus .flip-in, .flip:focus-within .flip-in {{ transform: rotateY(180deg); }}
-.flip-f, .flip-b {{ position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: 6px; padding: 16px 18px; box-sizing: border-box; }}
-.flip-f {{ background: #FFFFFF; border: 1px solid {BORDER}; display: flex; flex-direction: column; justify-content: space-between; }}
-.flip-b {{ background: {NAVY}; transform: rotateY(180deg); font-size: 0.84rem; line-height: 1.42; overflow: hidden; }}
-.flip-b, .flip-b * {{ color: #F4F1EA !important; }}
-.flip-bt {{ font-weight: 700; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: #E8B796 !important; margin-bottom: 6px; }}
-.flip-v {{ font-size: 2rem; font-weight: 700; color: {NAVY} !important; line-height: 1; font-variant-numeric: tabular-nums; }}
-.flip-t {{ font-size: 0.78rem; color: {MUTED} !important; text-transform: uppercase; letter-spacing: 0.07em; margin-top: 8px; font-weight: 500; }}
-.flip-i {{ position: absolute; top: 10px; right: 12px; width: 18px; height: 18px; border-radius: 50%; border: 1px solid {BORDER}; color: {MUTED} !important; font-size: 0.68rem; display: flex; align-items: center; justify-content: center; }}
-.kpi-bar {{ height: 6px; background: #E5E7EB; border-radius: 3px; margin-top: 10px; overflow: hidden; }}
-.kpi-bar-fill {{ height: 100%; border-radius: 3px; }}
-.kpi-card {{ background: #FFFFFF; border: 1px solid {BORDER}; border-radius: 6px; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; height: 120px; }}
+.flip-f, .flip-b {{ position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: 3px; box-sizing: border-box; }}
+.flip-f {{ background: {SURF}; border: 1px solid {BORDER}; padding: 14px 18px 0; display: flex; flex-direction: column; overflow: hidden; }}
+.flip-b {{ background: {BACKF}; transform: rotateY(180deg); padding: 16px 18px; font-size: 0.84rem; line-height: 1.42; overflow: hidden; }}
+.flip-b, .flip-b * {{ color: #EEF2F7 !important; }}
+.flip-bt {{ font-weight: 700; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; color: #F0B58F !important; margin-bottom: 6px; }}
+.flip-t {{ font-size: 0.7rem; color: {MUTED} !important; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; padding-right: 20px; }}
+.flip-v {{ font-size: 2rem; font-weight: 700; color: {NAVY} !important; line-height: 1; font-variant-numeric: tabular-nums; margin-top: auto; padding-bottom: 14px; }}
+.flip-i {{ position: absolute; top: 9px; right: 13px; color: {MUTED} !important; font-size: 0.8rem; opacity: .7; }}
+.flip-f .kpi-bar {{ position: absolute; left: 0; right: 0; bottom: 0; margin: 0; height: 4px; border-radius: 0; background: {BORDER}; }}
+.flip-f.sinbarra::after {{ content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 4px; background: {BORDER}; }}
+.kpi-bar-fill {{ height: 100%; border-radius: 0; }}
+.kpi-card {{ background: {SURF}; border: 1px solid {BORDER}; border-radius: 3px; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; height: 120px; }}
 .kpi-val {{ font-size: 2.2rem; font-weight: 700; color: {NAVY} !important; line-height: 1; margin-bottom: 8px; }}
 .kpi-title {{ font-size: 0.85rem; color: {MUTED} !important; text-transform: uppercase; letter-spacing: 0.05em; }}
 
-/* Guía de lectura interactiva */
-.guia-h {{ font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: {MUTED} !important; font-weight: 600; margin: 26px 0 6px; }}
-.guia-b {{ background: #FFFFFF; border: 1px solid {BORDER}; border-left: 4px solid {TERRACOTA}; border-radius: 4px; padding: 14px 18px; font-size: 0.97rem; margin-top: 6px; }}
+/* Guía de lectura */
+.guia-h {{ font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: {MUTED} !important; font-weight: 600; margin: 34px 0 8px; }}
+.guia-b {{ background: {SURF2}; border-radius: 3px; padding: 16px 20px; margin-top: 10px; font-size: 0.98rem; line-height: 1.5; }}
+.guia-b, .guia-b * {{ color: {TEXT} !important; }}
+.guia-b .gl {{ display: block; font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 700; color: {TERRACOTA} !important; margin-bottom: 6px; }}
 
-/* Filtros */
-.filtro-t {{ font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.09em; color: {MUTED} !important; margin: 6px 0 2px; }}
-button[data-testid="stBaseButton-pills"] {{ background: #FFFFFF !important; border: 1px solid {BORDER} !important; color: {NAVY} !important; border-radius: 999px !important; }}
-button[data-testid="stBaseButton-pillsActive"] {{ background: {NAVY} !important; border: 1px solid {NAVY} !important; border-radius: 999px !important; }}
-button[data-testid="stBaseButton-pillsActive"], button[data-testid="stBaseButton-pillsActive"] * {{ color: #FFFFFF !important; }}
-div[data-testid="stSegmentedControl"] button {{ background-color: #FFFFFF !important; border: 1px solid {BORDER} !important; color: {NAVY} !important; }}
-div[data-testid="stSegmentedControl"] button[aria-checked="true"] {{ background-color: {NAVY} !important; color: #FFF !important; }}
+/* Filtros: etiquetas rectangulares */
+.filtro-t {{ font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: {MUTED} !important; margin: 8px 0 4px; }}
+[data-testid="stButtonGroup"] button[role="radio"] {{ background: {SURF} !important; border: 1px solid {BORDER} !important; border-radius: 3px !important; padding: 5px 14px !important; box-shadow: none !important; }}
+[data-testid="stButtonGroup"] button[role="radio"], [data-testid="stButtonGroup"] button[role="radio"] * {{ color: {NAVY} !important; font-size: 0.86rem !important; font-weight: 500; }}
+[data-testid="stButtonGroup"] button[role="radio"]:hover {{ border-color: {NAVY} !important; }}
+[data-testid="stButtonGroup"] button[role="radio"][aria-checked="true"] {{ background: {ACT} !important; border-color: {ACT} !important; }}
+[data-testid="stButtonGroup"] button[role="radio"][aria-checked="true"], [data-testid="stButtonGroup"] button[role="radio"][aria-checked="true"] * {{ color: #FFFFFF !important; font-weight: 600; }}
 [data-baseweb="tab-list"] button span {{ color: {TEXT} !important; }}
 [data-baseweb="tab-list"] button[aria-selected="true"] span {{ color: {NAVY} !important; font-weight: 600; }}
 
-/* Botones principales (entrar, ver detalle) */
-button[data-testid="stBaseButton-primary"] {{ background: {TERRACOTA} !important; border: 1px solid {TERRACOTA} !important; border-radius: 6px !important; }}
+/* Botones */
+button[data-testid="stBaseButton-primary"] {{ background: {TERRACOTA} !important; border: 1px solid {TERRACOTA} !important; border-radius: 3px !important; }}
 button[data-testid="stBaseButton-primary"], button[data-testid="stBaseButton-primary"] * {{ color: #FFFFFF !important; font-weight: 600; }}
 button[data-testid="stBaseButton-primary"]:hover {{ background: #A04A22 !important; }}
-button[data-testid="stBaseButton-secondary"] {{ border: 1px solid {NAVY} !important; border-radius: 6px !important; background: #FFFFFF !important; }}
+button[data-testid="stBaseButton-secondary"] {{ border: 1px solid {NAVY} !important; border-radius: 3px !important; background: {SURF} !important; }}
 button[data-testid="stBaseButton-secondary"], button[data-testid="stBaseButton-secondary"] * {{ color: {NAVY} !important; font-weight: 500; }}
-button[data-testid="stBaseButton-secondary"]:hover {{ background: {NAVY} !important; }}
+button[data-testid="stBaseButton-secondary"]:hover {{ background: {ACT} !important; border-color: {ACT} !important; }}
 button[data-testid="stBaseButton-secondary"]:hover, button[data-testid="stBaseButton-secondary"]:hover * {{ color: #FFFFFF !important; }}
+button[data-testid="stBaseButton-tertiary"] {{ border: none !important; background: transparent !important; padding: 4px 0 !important; justify-content: flex-end; }}
+button[data-testid="stBaseButton-tertiary"], button[data-testid="stBaseButton-tertiary"] * {{ color: {TERRACOTA} !important; font-weight: 600; font-size: 0.9rem !important; }}
+button[data-testid="stBaseButton-tertiary"]:hover * {{ text-decoration: underline; }}
 section[data-testid="stSidebar"] button[data-testid="stBaseButton-secondary"] {{ background: transparent !important; border: 1px solid #5B7FA3 !important; }}
 section[data-testid="stSidebar"] button[data-testid="stBaseButton-secondary"] * {{ color: #F4F1EA !important; }}
+[data-testid="stMain"] [data-testid="stPopover"] button {{ background: {SURF} !important; border: 1px solid {NAVY} !important; border-radius: 3px !important; }}
+[data-testid="stMain"] [data-testid="stPopover"] button, [data-testid="stMain"] [data-testid="stPopover"] button * {{ color: {NAVY} !important; font-weight: 500; }}
 
-/* Ventanas flotantes (popovers y diálogos) */
-[data-testid="stPopoverBody"] {{ background: #FFFFFF !important; border: 1px solid {BORDER} !important; border-radius: 12px !important; box-shadow: 0 14px 36px rgba(27,58,92,.20) !important; padding: 18px 20px !important; }}
-div[role="dialog"] {{ border-radius: 14px !important; box-shadow: 0 20px 48px rgba(27,58,92,.28) !important; }}
+/* Ventanas flotantes */
+[data-testid="stPopoverBody"] {{ background: {SURF} !important; border: 1px solid {BORDER} !important; border-radius: 4px !important; box-shadow: 0 16px 40px rgba(0,0,0,.28) !important; padding: 18px 20px !important; }}
+div[role="dialog"] {{ background: {SURF} !important; border-radius: 4px !important; box-shadow: 0 20px 48px rgba(0,0,0,.35) !important; }}
 div[role="dialog"] h2 {{ font-size: 1.3rem !important; }}
+[data-testid="stPopoverBody"] *, div[role="dialog"] p, div[role="dialog"] li {{ color: {TEXT}; }}
+[data-baseweb="select"] > div, [data-baseweb="input"] > div, [data-baseweb="textarea"] {{ background: {SURF} !important; border-color: {BORDER} !important; border-radius: 3px !important; }}
+[data-baseweb="select"] *, [data-baseweb="input"] input {{ color: {TEXT} !important; }}
+ul[role="listbox"], [data-baseweb="popover"] > div, [data-baseweb="menu"] {{ background: {SURF} !important; }}
+ul[role="listbox"] li, [data-baseweb="menu"] li {{ color: {TEXT} !important; }}
+[data-testid="stSliderThumbValue"], [data-testid="stSliderTickBarMin"], [data-testid="stSliderTickBarMax"] {{ color: {TEXT} !important; }}
+[data-testid="stExpander"] {{ background: {SURF}; border: 1px solid {BORDER} !important; border-radius: 3px !important; }}
+[data-testid="stVerticalBlockBorderWrapper"] {{ border-color: {BORDER} !important; border-radius: 3px !important; }}
 
-/* Inicio: recorrido (solo informativo) y tarjetas de entrada (con botón) */
+/* Inicio: recorrido informativo y accesos */
 .steps {{ display: flex; margin: 10px 0 6px; }}
 .step {{ flex: 1; text-align: center; position: relative; padding: 0 12px; }}
-.step .n {{ width: 46px; height: 46px; border-radius: 50%; background: {NAVY}; color: #FFFFFF !important; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem; margin: 0 auto 10px; position: relative; z-index: 1; }}
-.step:not(:last-child)::after {{ content: ""; position: absolute; top: 23px; left: calc(50% + 32px); right: calc(-50% + 32px); border-top: 2px dashed #B9B2A3; }}
+.step .n {{ width: 44px; height: 44px; border-radius: 3px; background: {ACT}; color: #FFFFFF !important; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem; margin: 0 auto 10px; position: relative; z-index: 1; }}
+.step:not(:last-child)::after {{ content: ""; position: absolute; top: 22px; left: calc(50% + 30px); right: calc(-50% + 30px); border-top: 1px solid {MUTED}; opacity: .5; }}
 .step b {{ display: block; color: {NAVY} !important; font-size: 1.05rem; margin-bottom: 2px; }}
 .step span {{ color: {MUTED} !important; font-size: 0.9rem; line-height: 1.35; display: block; }}
 @media (max-width: 768px) {{ .steps {{ flex-direction: column; gap: 14px; }} .step:not(:last-child)::after {{ display: none; }} }}
-[class*="st-key-tile_"] {{ background: #FFFFFF; border: 1px solid {BORDER} !important; border-top: 4px solid {TERRACOTA} !important; border-radius: 6px !important; min-height: 215px; box-shadow: 0 1px 3px rgba(0,0,0,.05); }}
+[class*="st-key-tile_"] {{ background: {SURF}; border: 1px solid {BORDER} !important; border-radius: 3px !important; min-height: 200px; transition: border-color .2s, transform .2s; }}
+[class*="st-key-tile_"]:hover {{ border-color: {TERRACOTA} !important; transform: translateY(-2px); }}
 
-/* Prioridades */
-.prio {{ display: flex; gap: 14px; align-items: flex-start; background: #FFFFFF; border: 1px solid {BORDER}; border-radius: 6px; padding: 14px 16px; margin-bottom: 8px; font-size: 0.96rem; }}
-.prio b {{ color: {NAVY} !important; }}
-.chip {{ flex: none; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.09em; padding: 4px 10px; border-radius: 999px; color: #FFFFFF !important; margin-top: 2px; min-width: 88px; text-align: center; }}
+/* Prioridades: lista tipo tablero de control */
+.pr-est {{ display: flex; align-items: center; gap: 9px; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em; }}
+.pr-est i {{ width: 10px; height: 10px; border-radius: 2px; display: inline-block; }}
+.pr-t {{ font-weight: 700; color: {NAVY} !important; font-size: 1.02rem; }}
+.pr-d {{ color: {TEXT} !important; font-size: 0.93rem; }}
+[class*="st-key-prio_"] {{ background: {SURF}; border: 1px solid {BORDER}; border-radius: 3px; padding: 14px 20px; margin-bottom: 8px; transition: border-color .2s; }}
+[class*="st-key-prio_"]:hover {{ border-color: {NAVY}; }}
 
-/* Fondo de papel */
-[data-testid="stAppViewContainer"] {{ background-color: {PAPER}; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E"); }}
+/* Tablas HTML (modo noche) */
+.tbl-w {{ overflow: auto; border: 1px solid {BORDER}; border-radius: 3px; max-height: 440px; }}
+.tbl-w table {{ border-collapse: collapse; width: 100%; font-size: 0.88rem; }}
+.tbl-w th {{ background: {SURF2}; color: {NAVY} !important; text-align: left; padding: 8px 12px; position: sticky; top: 0; }}
+.tbl-w td {{ padding: 7px 12px; border-top: 1px solid {BORDER}; color: {TEXT}; }}
 </style>""", unsafe_allow_html=True)
 
 # ------------------------------------------------------------------ datos
@@ -252,6 +280,7 @@ MIN = mineria.cargar()
 
 with st.sidebar.expander("Opciones del tablero"):
     EXPLICA = st.toggle("Guía de lectura en cada gráfica", value=True, key="explica")
+    st.toggle("Modo noche", value=False, key="modo_noche")
     DEMO = st.toggle("Vista previa de diseño", value=False, key="demo")
     up = st.file_uploader("Cargar Excel de pruebas", type="xlsx")
 with st.sidebar.expander("Datos en vivo (base de la app)", expanded=True):
@@ -270,7 +299,7 @@ D = combinar(BASE_X, APP, FUENTE)
 SENS, DE_DW = load_sensores()
 if INFO:
     with st.sidebar.expander("Datos cargados"):
-        st.dataframe(pd.DataFrame(INFO), hide_index=True, width="stretch")
+        mineria.tabla(pd.DataFrame(INFO))
 PUBLIC_URL = "https://cloudsense-dashboars.streamlit.app/"
 with st.sidebar.popover("Abrir en el celular", icon=":material/qr_code_2:", width="stretch"):
     _url = st.text_input("Enlace público del tablero", value=PUBLIC_URL, placeholder="https://tu-tablero.streamlit.app")
@@ -290,7 +319,7 @@ st.sidebar.caption("Minería: " + MIN["fuente"])
 
 # ------------------------------------------------------------------ utilidades
 def header(titulo, pregunta):
-    st.markdown(f'<div class="hdr"><div class="tag">C.L.O.U.D. SENSE · TABLERO DE CONTROL</div><h1>{titulo}</h1><p>{pregunta}</p></div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="hdr"><h1>{titulo}</h1><p>{pregunta}</p></div>', unsafe_allow_html=True)
     if DEMO: st.markdown('<div class="demo">VISTA PREVIA DE DISEÑO · Datos de ejemplo, no son resultados del proyecto</div>', unsafe_allow_html=True)
 
 _sec_num = [0]
@@ -336,7 +365,7 @@ def eap(e, a, p):
     st.markdown('<div class="guia-h">Guía rápida de esta sección</div>', unsafe_allow_html=True)
     op = st.pills("Guía", ["¿Qué estoy viendo?", "¿Qué me dice?", "¿Qué puedo hacer?"], key=k, label_visibility="collapsed")
     txt = {"¿Qué estoy viendo?": e, "¿Qué me dice?": a, "¿Qué puedo hacer?": p}.get(op)
-    if txt: st.markdown(f'<div class="guia-b">{txt}</div>', unsafe_allow_html=True)
+    if txt: st.markdown(f'<div class="guia-b"><span class="gl">{op.strip("¿?")}</span>{txt}</div>', unsafe_allow_html=True)
     else: st.caption("Toca una de las tres opciones para leer la explicación.")
 
 def filtro(label, opciones, key, ayuda):
@@ -350,7 +379,7 @@ def filtro(label, opciones, key, ayuda):
 
 def _flip(valor, titulo, explicacion, color=NAVY, barra=None):
     b = f'<div class="kpi-bar"><div class="kpi-bar-fill" style="width:{barra:.0f}%;background-color:{color}"></div></div>' if barra is not None else ""
-    return (f'<div class="flip" tabindex="0"><div class="flip-in"><div class="flip-f"><div><div class="flip-v">{valor}</div><div class="flip-t">{titulo}</div></div>{b}<span class="flip-i">?</span></div>'
+    return (f'<div class="flip" tabindex="0"><div class="flip-in"><div class="flip-f{"" if b else " sinbarra"}"><div class="flip-t">{titulo}</div><div class="flip-v">{valor}</div>{b}<span class="flip-i">↻</span></div>'
             f'<div class="flip-b"><div class="flip-bt">{titulo}</div>{explicacion}</div></div></div>')
 
 def kpis(items, color=NAVY):
@@ -487,7 +516,7 @@ def analisis1():
         # MAPA DE FOLIUM (Calles reales de Tizimín)
         if not tq.dropna(subset=['latitud', 'longitud']).empty:
             # Centro en Tizimín
-            m = folium.Map(location=[21.143, -88.15], zoom_start=13, tiles="OpenStreetMap")
+            m = folium.Map(location=[21.143, -88.15], zoom_start=13, tiles=TILES)
             _encuadre(m, tq)
             pendientes = set(D["Fugas"].loc[D["Fugas"]["atendida"] == 0, "id_tanque"])
             
@@ -509,11 +538,13 @@ def analisis1():
         if rec.empty: vacio("Reabastecimientos", "los kilogramos de gas entregados por zona, tipo de cliente y semestre"); return
         m = rec.merge(tq[["id_tanque", "zona", "tipo_cliente"]], on="id_tanque", how="left")
         m["semestre"] = m["fecha"].dt.year.astype("Int64").astype(str) + "-S" + np.where(m["fecha"].dt.month <= 6, "1", "2")
-        sec("Filtra lo que quieres ver")
-        f1, f2 = st.columns(2)
-        with f1: zonas = filtro("Zona", sorted(m["zona"].dropna().unique()), "f_zona", "Sin selección se muestran todas. Toca una o varias zonas para filtrar.")
-        with f2: tipos = filtro("Tipo de cliente", sorted(m["tipo_cliente"].dropna().unique()), "f_tipo", "Sin selección se muestran todos. Toca uno o varios para filtrar.")
-        dim = st.segmented_control("Agrupar las gráficas por", ["zona", "tipo_cliente", "semestre"], default="zona", key="f_dim", format_func=lambda x: {"zona": "Zona", "tipo_cliente": "Tipo de cliente", "semestre": "Semestre"}[x]) or "zona"
+        n_f = len(st.session_state.get("f_zona") or []) + len(st.session_state.get("f_tipo") or [])
+        with st.popover(f"Filtros · {n_f} activo{'s' if n_f != 1 else ''}" if n_f else "Filtros · mostrando todo", icon=":material/filter_list:"):
+            zonas = filtro("Zona", sorted(m["zona"].dropna().unique()), "f_zona", "Sin selección se muestran todas.")
+            tipos = filtro("Tipo de cliente", sorted(m["tipo_cliente"].dropna().unique()), "f_tipo", "Sin selección se muestran todos.")
+            st.markdown('<div class="filtro-t">Agrupar las gráficas por</div>', unsafe_allow_html=True)
+            dim = st.segmented_control("Agrupar las gráficas por", ["zona", "tipo_cliente", "semestre"], default="zona", key="f_dim", label_visibility="collapsed", format_func=lambda x: {"zona": "Zona", "tipo_cliente": "Tipo de cliente", "semestre": "Semestre"}[x]) or "zona"
+        st.caption("Viendo: zona " + (", ".join(zonas) if n_f and st.session_state.get("f_zona") else "todas") + " · clientes " + (", ".join(tipos) if st.session_state.get("f_tipo") else "todos") + f" · agrupado por {dict(zona='zona', tipo_cliente='tipo de cliente', semestre='semestre')[dim]}")
         m = m[m["zona"].isin(zonas) & m["tipo_cliente"].isin(tipos)]
         if m.empty: st.info("No hay recargas con esa combinación. Toca “Ver todos” para quitar los filtros."); return
         sec("Cuánto gas se ha entregado")
@@ -589,7 +620,10 @@ def analisis2():
     a.caption("Cómo leerlo: cada barra es un tanque. Entre más corta la barra, menos días de gas le quedan. Rojo = atender primero.")
     
     cols = ["id_tanque", "zona", "estado", "dias_restantes", "fecha_agotamiento", "nivel_pct", "consumo_kg_dia"]
-    b.dataframe(res[cols].style.map(color_estado, subset=["estado"]), hide_index=True, height=420, width="stretch",
+    sty = res[cols].style.map(color_estado, subset=["estado"])
+    if DARK: mineria.tabla(sty, b)
+    else:
+        b.dataframe(sty, hide_index=True, height=420, width="stretch",
                 column_config={"id_tanque": "Tanque", "zona": "Zona", "estado": "Estado", "dias_restantes": st.column_config.NumberColumn("Días restantes", format="%.1f"), "fecha_agotamiento": "Se agota el",
                                "nivel_pct": st.column_config.ProgressColumn("Nivel actual", min_value=0, max_value=100, format="%.0f%%"), "consumo_kg_dia": st.column_config.NumberColumn("Consumo (kg/día)", format="%.2f")})
     
@@ -621,11 +655,15 @@ def analisis3():
     if tab.startswith("Mapa"):
         if fu.empty: vacio("Fugas", "el mapa de fugas por zona y tipo de cliente"); return
         m = fu.merge(tq, on="id_tanque", how="left")
-        gr = st.multiselect("Gravedad", ["Leve", "Media", "Alta"], default=["Leve", "Media", "Alta"]); m = m[m["gravedad"].isin(gr)]
+        n_g = len(st.session_state.get("f_grav") or [])
+        with st.popover(f"Filtros · {n_g} activo{'s' if n_g != 1 else ''}" if n_g else "Filtros · mostrando todo", icon=":material/filter_list:"):
+            gr = filtro("Gravedad", ["Leve", "Media", "Alta"], "f_grav", "Sin selección se muestran todas las gravedades.")
+        st.caption("Viendo: gravedad " + (", ".join(gr) if n_g else "todas"))
+        m = m[m["gravedad"].isin(gr)]
         a, b = st.columns([1.6, 1]); ll = m.dropna(subset=["latitud", "longitud"])
         if len(ll):
             # Mapa de fugas con Folium
-            mf = folium.Map(location=[21.143, -88.15], zoom_start=13, tiles="OpenStreetMap")
+            mf = folium.Map(location=[21.143, -88.15], zoom_start=13, tiles=TILES)
             _encuadre(mf, ll)
             for _, row in ll.iterrows():
                 color = "red" if row['gravedad'] == "Alta" else ("orange" if row['gravedad'] == "Media" else "green")
@@ -645,7 +683,7 @@ def analisis3():
               ("Respuesta típica", f"{fu['tiempo_respuesta_min'].median():.1f} min", "Es la mediana: la mitad de las alertas se atendió en menos tiempo que esto.")])
         a, b = st.columns([1.4, 1])
         v = fu.copy(); v["semáforo"] = np.where(v["atendida"] == 0, "Pendiente", np.where(v["tiempo_respuesta_min"] > 30, "Lenta", "Rápida"))
-        a.dataframe(v.sort_values("fecha_hora", ascending=False)[["id_alerta", "id_tanque", "fecha_hora", "gravedad", "tiempo_respuesta_min", "semáforo"]].style.map(color_estado, subset=["semáforo"]), hide_index=True, height=380, width="stretch")
+        mineria.tabla(v.sort_values("fecha_hora", ascending=False)[["id_alerta", "id_tanque", "fecha_hora", "gravedad", "tiempo_respuesta_min", "semáforo"]].style.map(color_estado, subset=["semáforo"]), a)
         b.plotly_chart(style(px.histogram(fu, x="tiempo_respuesta_min", nbins=10, title="Distribución del tiempo de respuesta (min)", labels={"tiempo_respuesta_min": "Minutos hasta atender", "count": "Alertas"}), 380), width="stretch")
         b.caption("Cómo leerlo: cada barra agrupa alertas por el tiempo que tardaron en atenderse. Lo ideal es que las barras altas estén a la izquierda (atención rápida).")
     else:
@@ -706,13 +744,19 @@ def decisiones():
     if _pm: acc.append(_pm)
 
     sec("Prioridades")
-    st.caption("Ordenadas de lo más urgente a lo que está en orden. Toca “Ver detalle” para ir a la sección donde se explica.")
     DEST = {"Reabastecer": "analisis2", "Atender fugas": "analisis3", "Calibrar el sensor": "analisis1", "Validación de mercado": "analisis1"}
     ETQ = {"Crítico": "URGENTE", "Atención": "ATENCIÓN", "Normal": "EN ORDEN"}; ORDEN = {"Crítico": 0, "Atención": 1, "Normal": 2}
+    cuenta = {e: sum(1 for x in acc if x[0] == e) for e in ORDEN}
+    op = ["Todas"] + [f"{ETQ[e].capitalize()} ({cuenta[e]})" for e in ORDEN if cuenta[e]]
+    ver = st.segmented_control("Mostrar", op, default="Todas", key="f_prio", label_visibility="collapsed") or "Todas"
+    st.caption("De lo más urgente a lo que está en orden. “Ver detalle” te lleva a la sección donde se explica.")
     for n, (est, t, d) in enumerate(sorted(acc, key=lambda x: ORDEN[x[0]])):
-        ct, cb = st.columns([8, 1.5], vertical_alignment="center")
-        ct.markdown(f'<div class="prio" style="border-left:4px solid {ESTADO_COL[est]}"><span class="chip" style="background:{ESTADO_COL[est]}">{ETQ[est]}</span><div><b>{t}</b><br>{d}</div></div>', unsafe_allow_html=True)
-        if t in DEST and cb.button("Ver detalle", key=f"prio_{n}"): st.switch_page(PAGES[DEST[t]])
+        if ver != "Todas" and not ver.startswith(ETQ[est].capitalize()): continue
+        with st.container(key=f"prio_{n}"):
+            c0, c1, c2 = st.columns([1.3, 6, 1.5], vertical_alignment="center")
+            c0.markdown(f'<div class="pr-est" style="color:{ESTADO_COL[est]}"><i style="background:{ESTADO_COL[est]}"></i>{ETQ[est]}</div>', unsafe_allow_html=True)
+            c1.markdown(f'<div class="pr-t">{t}</div><div class="pr-d">{d}</div>', unsafe_allow_html=True)
+            if t in DEST and c2.button("Ver detalle  →", key=f"prio_b{n}", type="tertiary", width="stretch"): st.switch_page(PAGES[DEST[t]])
 
     mineria.bloque(MIN, sec, kpi_card, style, eap, (NAVY, TERRACOTA, TEAL, MUSTARD, BRICK))
 
