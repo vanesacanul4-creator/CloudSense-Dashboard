@@ -22,7 +22,8 @@ else:      # día: azules fríos con naranja llama como acento
     NAVY, TEXT, MUTED = "#112A46", "#14233A", "#557392"
     SIDEBG, HDR1, HDR2, ACT, BACKF, SIDELINE = "#0A1B2E", "#0F2744", "#1F5FA8", "#1C5FB8", "#112A46", "#1B3B5A"
     TERRACOTA, MUSTARD, TEAL, BRICK, BLUE = "#F26A1B", "#E58A00", "#0FA38F", "#E5242B", "#2F80ED"
-MAPKW = dict(tiles="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", attr="© OpenStreetMap contributors © CARTO") if DARK else dict(tiles="OpenStreetMap")
+MAPKW = dict(tiles="OpenStreetMap")
+MAPCSS = "<style>.leaflet-tile-pane{filter:invert(1) hue-rotate(195deg) brightness(.9) contrast(.95) saturate(.8);}.leaflet-container{background:#0A1B2E;}</style>" if DARK else ""
 px.defaults.color_discrete_sequence = [TERRACOTA, BLUE, MUSTARD, TEAL, BRICK, "#7A8CA6"]
 
 ESTADO_COL = {"Crítico": BRICK, "Atención": MUSTARD, "Normal": TEAL, "Sin consumo": "#94A3B8"}
@@ -530,6 +531,7 @@ def analisis1():
         if not tq.dropna(subset=['latitud', 'longitud']).empty:
             # Centro en Tizimín
             m = folium.Map(location=[21.143, -88.15], zoom_start=13, **MAPKW)
+            if MAPCSS: m.get_root().header.add_child(folium.Element(MAPCSS))
             _encuadre(m, tq)
             pendientes = set(D["Fugas"].loc[D["Fugas"]["atendida"] == 0, "id_tanque"])
             
@@ -673,6 +675,7 @@ def analisis3():
         if len(ll):
             # Mapa de fugas con Folium
             mf = folium.Map(location=[21.143, -88.15], zoom_start=13, **MAPKW)
+            if MAPCSS: mf.get_root().header.add_child(folium.Element(MAPCSS))
             _encuadre(mf, ll)
             for _, row in ll.iterrows():
                 color = "red" if row['gravedad'] == "Alta" else ("orange" if row['gravedad'] == "Media" else "green")
