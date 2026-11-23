@@ -11,26 +11,27 @@ SQL_RESULT = ("SELECT lectura_id, clase_real, clase_predicha, probabilidad FROM 
               "WHERE ejecucion_id = :ej")
 
 
-@st.cache_data(ttl=300, show_spinner=False)
+@st.cache_data(ttl=60, show_spinner=False)
 def _consulta(sql, ej=None):
-    """Ejecuta una consulta de solo lectura con st.connection; devuelve None si no hay conexión."""
-    try:
-        con = st.connection("postgresql", type="sql")
-        return con.query(sql, params={"ej": ej} if ej else None, ttl=0)
-    except Exception:
-        return None
+    """Consulta de solo lectura con st.connection. Si falla lanza la excepción (así un fallo no se queda en caché)."""
+    con = st.connection("postgresql", type="sql")
+    return con.query(sql, params={"ej": ej} if ej else None, ttl=0)
 
 
 def cargar():
     """Devuelve dict(ok, fuente, modelos, resultados). Primero PostgreSQL, luego CSV de respaldo."""
-    m = _consulta(SQL_MODELOS)
-    if m is not None and not m.empty:
-        r = _consulta(SQL_RESULT, str(m.iloc[0]["ejecucion_id"]))
-        if r is not None and not r.empty:
-            return dict(ok=True, fuente="PostgreSQL (bodega de datos)", modelos=m, resultados=r)
+    motivo = "tablas vacías"
+    try:
+        m = _consulta(SQL_MODELOS)
+        if m is not None and not m.empty:
+            r = _consulta(SQL_RESULT, str(m.iloc[0]["ejecucion_id"]))
+            if r is not None and not r.empty:
+                return dict(ok=True, fuente="PostgreSQL (bodega de datos)", modelos=m, resultados=r)
+    except Exception as e:
+        motivo = type(e).__name__ + ": " + (str(getattr(e, "orig", e)).strip().splitlines() or [""])[0][:110]
     pm, pr = DATA / "modelos_mineria_respaldo.csv", DATA / "resultados_mineria_respaldo.csv"
     if pm.exists() and pr.exists():
-        return dict(ok=True, fuente="archivos de respaldo (sin conexión a la base)", modelos=pd.read_csv(pm), resultados=pd.read_csv(pr))
+        return dict(ok=True, fuente=f"archivos de respaldo (sin conexión a la base · {motivo})", modelos=pd.read_csv(pm), resultados=pd.read_csv(pr))
     return dict(ok=False, fuente="sin datos", modelos=pd.DataFrame(), resultados=pd.DataFrame())
 
 
