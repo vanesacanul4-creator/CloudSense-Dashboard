@@ -12,20 +12,18 @@ ASSETS, DATA = BASE / "assets", BASE / "data"
 
 # Paleta Editorial (día / noche)
 DARK = bool(st.session_state.get("modo_noche", False))
-if DARK:
-    PAPER, SURF, SURF2, BORDER = "#0D1624", "#15233A", "#1B2D49", "#2B3E5C"
-    NAVY, TEXT, MUTED = "#9CC0E8", "#E3E9F1", "#9FB0C6"
-    SIDEBG, HDR1, HDR2, ACT, BACKF = "#09111D", "#14294A", "#1E3A63", "#3D6EA8", "#1F3A63"
-else:
-    PAPER, SURF, SURF2, BORDER = "#F4F1EA", "#FFFFFF", "#EBE6DA", "#DDD6C8"
-    NAVY, TEXT, MUTED = "#1B3A5C", "#2B2B2B", "#6B6B6B"
-    SIDEBG, HDR1, HDR2, ACT, BACKF = "#1B3A5C", "#1B3A5C", "#27527E", "#1B3A5C", "#1B3A5C"
-TERRACOTA = "#C05A2B"
-TEAL = "#4A8B9E"
-MUSTARD = "#C08A2E"
-BRICK = "#9B2C2C" if not DARK else "#D66A6A"
+if DARK:   # noche: azul profundo
+    PAPER, SURF, SURF2, BORDER = "#0A1B2E", "#112A46", "#1B3B5A", "#34506D"
+    NAVY, TEXT, MUTED = "#C4D2E1", "#E1E8F0", "#8FA3BC"
+    SIDEBG, HDR1, HDR2, ACT, BACKF, SIDELINE = "#07131F", "#112A46", "#1F4A7A", "#2F80ED", "#1B3B5A", "#1B3B5A"
+    TERRACOTA, MUSTARD, TEAL, BRICK, BLUE = "#FF7A2F", "#FFB224", "#1FC8AE", "#FF4D55", "#4C9AFF"
+else:      # día: azules fríos con naranja llama como acento
+    PAPER, SURF, SURF2, BORDER = "#F2F6FB", "#FFFFFF", "#E1E8F0", "#C4D2E1"
+    NAVY, TEXT, MUTED = "#112A46", "#14233A", "#557392"
+    SIDEBG, HDR1, HDR2, ACT, BACKF, SIDELINE = "#0A1B2E", "#0F2744", "#1F5FA8", "#1C5FB8", "#112A46", "#1B3B5A"
+    TERRACOTA, MUSTARD, TEAL, BRICK, BLUE = "#F26A1B", "#E58A00", "#0FA38F", "#E5242B", "#2F80ED"
 TILES = "CartoDB dark_matter" if DARK else "OpenStreetMap"
-px.defaults.color_discrete_sequence = [TERRACOTA, NAVY, MUSTARD, TEAL, BRICK, "#94A3B8"]
+px.defaults.color_discrete_sequence = [TERRACOTA, BLUE, MUSTARD, TEAL, BRICK, "#7A8CA6"]
 
 ESTADO_COL = {"Crítico": BRICK, "Atención": MUSTARD, "Normal": TEAL, "Sin consumo": "#94A3B8"}
 
@@ -53,24 +51,24 @@ header[data-testid="stHeader"] {{ background: transparent; }}
 
 /* Barra lateral */
 section[data-testid="stSidebar"] {{ background-color: {SIDEBG} !important; }}
-section[data-testid="stSidebar"] * {{ color: #F4F1EA !important; }}
-section[data-testid="stSidebar"] [data-testid="stCaptionContainer"] * {{ color: #AFC2D8 !important; }}
+section[data-testid="stSidebar"] * {{ color: #EAF1F8 !important; }}
+section[data-testid="stSidebar"] [data-testid="stCaptionContainer"] * {{ color: #A1B2C4 !important; }}
 section[data-testid="stSidebar"] div[data-testid="stExpander"] {{ border: none !important; background-color: transparent !important; }}
-section[data-testid="stSidebar"] div[data-testid="stExpander"] summary {{ background-color: transparent !important; border-bottom: 1px solid #2E5075; }}
+section[data-testid="stSidebar"] div[data-testid="stExpander"] summary {{ background-color: transparent !important; border-bottom: 1px solid {SIDELINE}; }}
 section[data-testid="stSidebar"] div[data-testid="stExpander"] div[role="region"] {{ background-color: transparent !important; }}
-section[data-testid="stSidebar"] [data-testid="stPopover"] > div > button, section[data-testid="stSidebar"] [data-testid="stPopover"] button {{ background: transparent !important; border: 1px solid #5B7FA3 !important; border-radius: 3px !important; }}
-section[data-testid="stSidebar"] [data-testid="stPopover"] button * {{ color: #F4F1EA !important; }}
-a[data-testid="stSidebarNavLink"] {{ background: transparent; border: 1px solid transparent; border-radius: 0px; padding: 0.75rem 0.5rem; margin-bottom: 0.2rem; border-bottom: 1px solid #2E5075; transition: all 0.2s; }}
-a[data-testid="stSidebarNavLink"] span {{ font-size: 0.92rem; font-weight: 400; color: #D1D5DB !important; }}
-a[data-testid="stSidebarNavLink"]:hover {{ background: #24486B; padding-left: 1rem; }}
+section[data-testid="stSidebar"] [data-testid="stPopover"] > div > button, section[data-testid="stSidebar"] [data-testid="stPopover"] button {{ background: transparent !important; border: 1px solid #3F6A99 !important; border-radius: 3px !important; }}
+section[data-testid="stSidebar"] [data-testid="stPopover"] button * {{ color: #EAF1F8 !important; }}
+a[data-testid="stSidebarNavLink"] {{ background: transparent; border: 1px solid transparent; border-radius: 0px; padding: 0.75rem 0.5rem; margin-bottom: 0.2rem; border-bottom: 1px solid {SIDELINE}; transition: all 0.2s; }}
+a[data-testid="stSidebarNavLink"] span {{ font-size: 0.92rem; font-weight: 400; color: #C4D2E1 !important; }}
+a[data-testid="stSidebarNavLink"]:hover {{ background: {SIDELINE}; padding-left: 1rem; }}
 a[data-testid="stSidebarNavLink"][aria-current="page"] {{ background: {TERRACOTA}; border-bottom: 1px solid {TERRACOTA}; }}
 a[data-testid="stSidebarNavLink"][aria-current="page"] span {{ color: #fff !important; font-weight: 600; }}
 
 /* Encabezado de cada página: franja azul con el título en blanco */
 .hdr {{ background: linear-gradient(105deg, {HDR1} 0%, {HDR2} 100%); border-radius: 3px; padding: 30px 36px 28px; margin: 0 0 30px; display: flex; flex-direction: column; position: relative; overflow: hidden; }}
-.hdr::after {{ content: ""; position: absolute; right: -40px; top: -60px; width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, rgba(192,90,43,.45) 0%, rgba(192,90,43,0) 68%); }}
+.hdr::after {{ content: ""; position: absolute; right: -40px; top: -60px; width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, rgba(242,106,27,.40) 0%, rgba(242,106,27,0) 68%); }}
 .hdr h1 {{ margin: 0; font-size: 2.35rem; color: #FFFFFF !important; padding: 0; line-height: 1.12; font-weight: 700 !important; letter-spacing: -0.015em; position: relative; z-index: 1; }}
-.hdr p {{ margin: 10px 0 0 0; color: #C9D8EA !important; font-size: 1.05rem; max-width: 820px; position: relative; z-index: 1; }}
+.hdr p {{ margin: 10px 0 0 0; color: #C4D2E1 !important; font-size: 1.05rem; max-width: 820px; position: relative; z-index: 1; }}
 @media (max-width: 768px) {{ .hdr {{ padding: 22px 20px; }} .hdr h1 {{ font-size: 1.7rem; }} .hdr p {{ font-size: .95rem; }} }}
 .demo {{ background: #FFF3E0; color: #B45F06 !important; font-size: 0.8rem; border-left: 4px solid #B45F06; padding: 8px 16px; margin-bottom: 20px; }}
 
@@ -92,7 +90,7 @@ a[data-testid="stSidebarNavLink"][aria-current="page"] span {{ color: #fff !impo
 .flip-f {{ background: {SURF}; border: 1px solid {BORDER}; padding: 14px 18px 0; display: flex; flex-direction: column; overflow: hidden; }}
 .flip-b {{ background: {BACKF}; transform: rotateY(180deg); padding: 16px 18px; font-size: 0.84rem; line-height: 1.42; overflow: hidden; }}
 .flip-b, .flip-b * {{ color: #EEF2F7 !important; }}
-.flip-bt {{ font-weight: 700; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; color: #F0B58F !important; margin-bottom: 6px; }}
+.flip-bt {{ font-weight: 700; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; color: #FFB07A !important; margin-bottom: 6px; }}
 .flip-t {{ font-size: 0.7rem; color: {MUTED} !important; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; padding-right: 20px; }}
 .flip-v {{ font-size: 2rem; font-weight: 700; color: {NAVY} !important; line-height: 1; font-variant-numeric: tabular-nums; margin-top: auto; padding-bottom: 14px; }}
 .flip-i {{ position: absolute; top: 9px; right: 13px; color: {MUTED} !important; font-size: 0.8rem; opacity: .7; }}
@@ -111,18 +109,28 @@ a[data-testid="stSidebarNavLink"][aria-current="page"] span {{ color: #fff !impo
 
 /* Filtros: etiquetas rectangulares */
 .filtro-t {{ font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: {MUTED} !important; margin: 8px 0 4px; }}
-[data-testid="stButtonGroup"] button[role="radio"] {{ background: {SURF} !important; border: 1px solid {BORDER} !important; border-radius: 3px !important; padding: 5px 14px !important; box-shadow: none !important; }}
-[data-testid="stButtonGroup"] button[role="radio"], [data-testid="stButtonGroup"] button[role="radio"] * {{ color: {NAVY} !important; font-size: 0.86rem !important; font-weight: 500; }}
-[data-testid="stButtonGroup"] button[role="radio"]:hover {{ border-color: {NAVY} !important; }}
-[data-testid="stButtonGroup"] button[role="radio"][aria-checked="true"] {{ background: {ACT} !important; border-color: {ACT} !important; }}
-[data-testid="stButtonGroup"] button[role="radio"][aria-checked="true"], [data-testid="stButtonGroup"] button[role="radio"][aria-checked="true"] * {{ color: #FFFFFF !important; font-weight: 600; }}
+[data-testid="stButtonGroup"] button[role="radio"], [data-testid="stButtonGroup"] button[role="checkbox"] {{ background: {SURF} !important; border: 1px solid {BORDER} !important; border-radius: 3px !important; padding: 5px 14px !important; box-shadow: none !important; }}
+[data-testid="stButtonGroup"] button[role="radio"], [data-testid="stButtonGroup"] button[role="checkbox"], [data-testid="stButtonGroup"] button[role="radio"] *, [data-testid="stButtonGroup"] button[role="checkbox"] * {{ color: {NAVY} !important; font-size: 0.86rem !important; font-weight: 500; }}
+[data-testid="stButtonGroup"] button[role="radio"]:hover, [data-testid="stButtonGroup"] button[role="checkbox"]:hover {{ border-color: {NAVY} !important; }}
+[data-testid="stButtonGroup"] button[role="radio"][aria-checked="true"], [data-testid="stButtonGroup"] button[role="checkbox"][aria-checked="true"] {{ background: {ACT} !important; border-color: {ACT} !important; }}
+[data-testid="stButtonGroup"] button[role="radio"][aria-checked="true"], [data-testid="stButtonGroup"] button[role="checkbox"][aria-checked="true"], [data-testid="stButtonGroup"] button[role="radio"][aria-checked="true"] *, [data-testid="stButtonGroup"] button[role="checkbox"][aria-checked="true"] * {{ color: #FFFFFF !important; font-weight: 600; }}
+button[data-testid="stBaseButton-pills"] {{ background: {SURF} !important; border: 1px solid {BORDER} !important; border-radius: 3px !important; padding: 5px 14px !important; box-shadow: none !important; }}
+button[data-testid="stBaseButton-pills"], button[data-testid="stBaseButton-pills"] * {{ color: {NAVY} !important; font-size: 0.86rem !important; font-weight: 500; }}
+button[data-testid="stBaseButton-pills"]:hover {{ border-color: {NAVY} !important; }}
+button[data-testid="stBaseButton-pillsActive"] {{ background: {ACT} !important; border: 1px solid {ACT} !important; border-radius: 3px !important; padding: 5px 14px !important; }}
+button[data-testid="stBaseButton-pillsActive"], button[data-testid="stBaseButton-pillsActive"] * {{ color: #FFFFFF !important; font-size: 0.86rem !important; font-weight: 600; }}
+button[data-variant="pills"] {{ background: {SURF} !important; border: 1px solid {BORDER} !important; border-radius: 3px !important; padding: 5px 14px !important; box-shadow: none !important; }}
+button[data-variant="pills"], button[data-variant="pills"] * {{ color: {NAVY} !important; font-size: 0.86rem !important; font-weight: 500; }}
+button[data-variant="pills"]:hover {{ border-color: {NAVY} !important; }}
+button[data-variant="pills"][aria-pressed="true"] {{ background: {ACT} !important; border-color: {ACT} !important; }}
+button[data-variant="pills"][aria-pressed="true"], button[data-variant="pills"][aria-pressed="true"] * {{ color: #FFFFFF !important; font-weight: 600; }}
 [data-baseweb="tab-list"] button span {{ color: {TEXT} !important; }}
 [data-baseweb="tab-list"] button[aria-selected="true"] span {{ color: {NAVY} !important; font-weight: 600; }}
 
 /* Botones */
 button[data-testid="stBaseButton-primary"] {{ background: {TERRACOTA} !important; border: 1px solid {TERRACOTA} !important; border-radius: 3px !important; }}
 button[data-testid="stBaseButton-primary"], button[data-testid="stBaseButton-primary"] * {{ color: #FFFFFF !important; font-weight: 600; }}
-button[data-testid="stBaseButton-primary"]:hover {{ background: #A04A22 !important; }}
+button[data-testid="stBaseButton-primary"]:hover {{ background: #D9560C !important; }}
 button[data-testid="stBaseButton-secondary"] {{ border: 1px solid {NAVY} !important; border-radius: 3px !important; background: {SURF} !important; }}
 button[data-testid="stBaseButton-secondary"], button[data-testid="stBaseButton-secondary"] * {{ color: {NAVY} !important; font-weight: 500; }}
 button[data-testid="stBaseButton-secondary"]:hover {{ background: {ACT} !important; border-color: {ACT} !important; }}
@@ -130,8 +138,8 @@ button[data-testid="stBaseButton-secondary"]:hover, button[data-testid="stBaseBu
 button[data-testid="stBaseButton-tertiary"] {{ border: none !important; background: transparent !important; padding: 4px 0 !important; justify-content: flex-end; }}
 button[data-testid="stBaseButton-tertiary"], button[data-testid="stBaseButton-tertiary"] * {{ color: {TERRACOTA} !important; font-weight: 600; font-size: 0.9rem !important; }}
 button[data-testid="stBaseButton-tertiary"]:hover * {{ text-decoration: underline; }}
-section[data-testid="stSidebar"] button[data-testid="stBaseButton-secondary"] {{ background: transparent !important; border: 1px solid #5B7FA3 !important; }}
-section[data-testid="stSidebar"] button[data-testid="stBaseButton-secondary"] * {{ color: #F4F1EA !important; }}
+section[data-testid="stSidebar"] button[data-testid="stBaseButton-secondary"] {{ background: transparent !important; border: 1px solid #3F6A99 !important; }}
+section[data-testid="stSidebar"] button[data-testid="stBaseButton-secondary"] * {{ color: #EAF1F8 !important; }}
 [data-testid="stMain"] [data-testid="stPopover"] button {{ background: {SURF} !important; border: 1px solid {NAVY} !important; border-radius: 3px !important; }}
 [data-testid="stMain"] [data-testid="stPopover"] button, [data-testid="stMain"] [data-testid="stPopover"] button * {{ color: {NAVY} !important; font-weight: 500; }}
 
@@ -305,7 +313,7 @@ with st.sidebar.popover("Abrir en el celular", icon=":material/qr_code_2:", widt
     _url = st.text_input("Enlace público del tablero", value=PUBLIC_URL, placeholder="https://tu-tablero.streamlit.app")
     if _url.startswith("http"):
         import io, segno
-        _b = io.BytesIO(); segno.make(_url, error="m").save(_b, kind="png", scale=8, border=2, dark="#1B3A5C", light="#FFFFFF")
+        _b = io.BytesIO(); segno.make(_url, error="m").save(_b, kind="png", scale=8, border=2, dark="#112A46", light="#FFFFFF")
         st.image(_b.getvalue(), width=220); st.caption("Escanea el código con la cámara del celular.")
     else: st.caption("Pega el enlace público del tablero y aquí aparecerá su código QR.")
 if DEMO: _fuente_txt = "datos de ejemplo"
@@ -342,7 +350,7 @@ def style(fig, h=380):
         plot_bgcolor="rgba(0,0,0,0)", 
         font=dict(color=TEXT, family="IBM Plex Sans, sans-serif", size=12),
         margin=dict(l=10, r=10, t=50, b=10),
-        colorway=[TERRACOTA, NAVY, MUSTARD, TEAL, BRICK, "#94A3B8"],
+        colorway=[TERRACOTA, BLUE, MUSTARD, TEAL, BRICK, "#7A8CA6"],
         legend=dict(orientation="h", y=-0.2, title=None, font=dict(color=TEXT)),
         title=dict(font=dict(family="IBM Plex Sans, sans-serif", size=17, color=NAVY))
     )
@@ -538,13 +546,12 @@ def analisis1():
         if rec.empty: vacio("Reabastecimientos", "los kilogramos de gas entregados por zona, tipo de cliente y semestre"); return
         m = rec.merge(tq[["id_tanque", "zona", "tipo_cliente"]], on="id_tanque", how="left")
         m["semestre"] = m["fecha"].dt.year.astype("Int64").astype(str) + "-S" + np.where(m["fecha"].dt.month <= 6, "1", "2")
-        n_f = len(st.session_state.get("f_zona") or []) + len(st.session_state.get("f_tipo") or [])
-        with st.popover(f"Filtros · {n_f} activo{'s' if n_f != 1 else ''}" if n_f else "Filtros · mostrando todo", icon=":material/filter_list:"):
-            zonas = filtro("Zona", sorted(m["zona"].dropna().unique()), "f_zona", "Sin selección se muestran todas.")
-            tipos = filtro("Tipo de cliente", sorted(m["tipo_cliente"].dropna().unique()), "f_tipo", "Sin selección se muestran todos.")
-            st.markdown('<div class="filtro-t">Agrupar las gráficas por</div>', unsafe_allow_html=True)
-            dim = st.segmented_control("Agrupar las gráficas por", ["zona", "tipo_cliente", "semestre"], default="zona", key="f_dim", label_visibility="collapsed", format_func=lambda x: {"zona": "Zona", "tipo_cliente": "Tipo de cliente", "semestre": "Semestre"}[x]) or "zona"
-        st.caption("Viendo: zona " + (", ".join(zonas) if n_f and st.session_state.get("f_zona") else "todas") + " · clientes " + (", ".join(tipos) if st.session_state.get("f_tipo") else "todos") + f" · agrupado por {dict(zona='zona', tipo_cliente='tipo de cliente', semestre='semestre')[dim]}")
+        sec("Filtra lo que quieres ver")
+        f1, f2 = st.columns(2)
+        with f1: zonas = filtro("Zona", sorted(m["zona"].dropna().unique()), "f_zona", "Sin selección se muestran todas. Toca una o varias zonas para filtrar.")
+        with f2: tipos = filtro("Tipo de cliente", sorted(m["tipo_cliente"].dropna().unique()), "f_tipo", "Sin selección se muestran todos. Toca uno o varios para filtrar.")
+        st.markdown('<div class="filtro-t">Agrupar las gráficas por</div>', unsafe_allow_html=True)
+        dim = st.segmented_control("Agrupar las gráficas por", ["zona", "tipo_cliente", "semestre"], default="zona", key="f_dim", label_visibility="collapsed", format_func=lambda x: {"zona": "Zona", "tipo_cliente": "Tipo de cliente", "semestre": "Semestre"}[x]) or "zona"
         m = m[m["zona"].isin(zonas) & m["tipo_cliente"].isin(tipos)]
         if m.empty: st.info("No hay recargas con esa combinación. Toca “Ver todos” para quitar los filtros."); return
         sec("Cuánto gas se ha entregado")
@@ -655,10 +662,7 @@ def analisis3():
     if tab.startswith("Mapa"):
         if fu.empty: vacio("Fugas", "el mapa de fugas por zona y tipo de cliente"); return
         m = fu.merge(tq, on="id_tanque", how="left")
-        n_g = len(st.session_state.get("f_grav") or [])
-        with st.popover(f"Filtros · {n_g} activo{'s' if n_g != 1 else ''}" if n_g else "Filtros · mostrando todo", icon=":material/filter_list:"):
-            gr = filtro("Gravedad", ["Leve", "Media", "Alta"], "f_grav", "Sin selección se muestran todas las gravedades.")
-        st.caption("Viendo: gravedad " + (", ".join(gr) if n_g else "todas"))
+        gr = filtro("Gravedad", ["Leve", "Media", "Alta"], "f_grav", "Sin selección se muestran todas las gravedades. Toca una o varias para filtrar.")
         m = m[m["gravedad"].isin(gr)]
         a, b = st.columns([1.6, 1]); ll = m.dropna(subset=["latitud", "longitud"])
         if len(ll):

@@ -86,7 +86,7 @@ def bloque(M, sec, kpi_card, style, eap, colores):
 
     c1, c2 = st.columns(2)
     z = a["cm"].values; cl = a["clases"]
-    fig = go.Figure(go.Heatmap(z=z, x=cl, y=cl, colorscale=[[0, "#FFFFFF"], [1, NAVY]], showscale=False,
+    fig = go.Figure(go.Heatmap(z=z, x=cl, y=cl, colorscale=[[0, "#FFFFFF"], [1, "#1F5FA8"]], showscale=False,
                                text=z, texttemplate="%{text}", hovertemplate="Real %{y} → predicho %{x}: %{z}<extra></extra>"))
     fig.update_layout(title="Matriz de confusión (filas = real, columnas = predicho)", xaxis_title="Clase predicha", yaxis_title="Clase real")
     fig.update_yaxes(autorange="reversed")
