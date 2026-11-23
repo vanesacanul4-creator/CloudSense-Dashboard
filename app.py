@@ -23,13 +23,13 @@ else:      # día: azules fríos con naranja llama como acento
     SIDEBG, HDR1, HDR2, ACT, BACKF, SIDELINE = "#0A1B2E", "#0F2744", "#1F5FA8", "#1C5FB8", "#112A46", "#1B3B5A"
     TERRACOTA, MUSTARD, TEAL, BRICK, BLUE = "#F26A1B", "#E58A00", "#0FA38F", "#E5242B", "#2F80ED"
 MAPKW = dict(tiles="OpenStreetMap")
-_POP = ("<style>.leaflet-popup-content-wrapper{border-radius:2px;padding:0;overflow:hidden;box-shadow:0 8px 24px rgba(10,27,46,.35);background:%s}.leaflet-popup-content{margin:0;width:250px!important;font-family:'IBM Plex Sans',Arial,sans-serif}"
-        ".leaflet-popup-tip{background:%s}.leaflet-container a.leaflet-popup-close-button{color:#C4D2E1;top:7px;right:6px}"
-        ".fh{background:#0F2744;color:#fff;padding:11px 34px 10px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px}"
-        ".fh small{display:block;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:#9FB6D1;margin-bottom:1px}.fh strong{font-size:16px;font-weight:700;letter-spacing:.01em}"
-        ".fh em{font-style:normal;font-size:9.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#fff;padding:3px 8px;border-radius:2px;white-space:nowrap}"
-        ".fg{display:grid;grid-template-columns:1fr 1fr;gap:0}.fc{padding:9px 14px;border-top:1px solid %s}.fc:nth-child(odd){border-right:1px solid %s}"
-        ".fc span{display:block;font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:%s;margin-bottom:2px}.fc b{font-size:12.5px;font-weight:600;color:%s;white-space:nowrap}</style>")
+_POP = ("<style>.leaflet-popup-content-wrapper{border-radius:2px;padding:0;overflow:hidden;box-shadow:0 8px 24px rgba(10,27,46,.35);background:%s}.leaflet-popup-content{margin:0;width:206px!important;font-family:'IBM Plex Sans',Arial,sans-serif}"
+        ".leaflet-popup-tip{background:%s}.leaflet-container a.leaflet-popup-close-button{color:#C4D2E1;top:5px;right:4px}.leaflet-tooltip{background:#0F2744;border:0;border-radius:2px;color:#fff;font:600 12px 'IBM Plex Sans',Arial,sans-serif;padding:5px 9px;box-shadow:0 4px 12px rgba(10,27,46,.35)}.leaflet-tooltip i{font-style:normal;font-weight:400;color:#9FB6D1;margin-left:6px}.leaflet-tooltip-top:before{border-top-color:#0F2744}.leaflet-tooltip-bottom:before{border-bottom-color:#0F2744}.leaflet-tooltip-left:before{border-left-color:#0F2744}.leaflet-tooltip-right:before{border-right-color:#0F2744}"
+        ".fh{background:#0F2744;color:#fff;padding:8px 28px 7px 11px;display:flex;justify-content:space-between;align-items:center;gap:10px}"
+        ".fh small{display:block;font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;color:#9FB6D1;margin-bottom:1px}.fh strong{font-size:14px;font-weight:700;letter-spacing:.01em}"
+        ".fh em{font-style:normal;font-size:8.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#fff;padding:2px 6px;border-radius:2px;white-space:nowrap}"
+        ".fg{display:grid;grid-template-columns:1fr 1fr;gap:0}.fc{padding:6px 11px;border-top:1px solid %s}.fc:nth-child(odd){border-right:1px solid %s}"
+        ".fc span{display:block;font-size:8px;letter-spacing:.13em;text-transform:uppercase;color:%s;margin-bottom:2px}.fc b{font-size:11.5px;font-weight:600;color:%s;white-space:nowrap}</style>")
 MAPCSS = _POP % (("#112A46", "#112A46", "#2B3E5C", "#2B3E5C", "#8FA3BC", "#E3E9F1") if DARK else ("#FFFFFF", "#FFFFFF", "#E1E8F0", "#E1E8F0", "#557392", "#112A46")) + ("<style>.leaflet-tile-pane{filter:invert(1) hue-rotate(195deg) brightness(.9) contrast(.95) saturate(.8);}.leaflet-container{background:#0A1B2E;}</style>" if DARK else "")
 px.defaults.color_discrete_sequence = [TERRACOTA, BLUE, MUSTARD, TEAL, BRICK, "#7A8CA6"]
 
@@ -556,6 +556,7 @@ def analisis1():
                     popup=ficha("Tanque", row['id_tanque'], "Alerta" if row['id_tanque'] in pendientes else "Normal", "#E5242B" if row['id_tanque'] in pendientes else "#0FA38F",
                                 [("Propietario", str(row['cliente']).split(" · ")[0]), ("Nombre", (str(row['cliente']).split(" · ") + ["—"])[1]),
                                  ("Capacidad", f"{row['capacidad_kg']:.0f} kg" if pd.notna(row['capacidad_kg']) else "—"), ("Zona", row['zona'])]),
+                    tooltip=folium.Tooltip(f"{(str(row['cliente']).split(' · ') + [row['id_tanque']])[1]}<i>{str(row['cliente']).split(' · ')[0]}</i>"),
                     icon=folium.Icon(color=color_punto, icon="info-sign")
                 ).add_to(m)
             
@@ -698,6 +699,7 @@ def analisis3():
                     popup=ficha("Alerta", row['id_alerta'], row['gravedad'], {"Alta": "#E5242B", "Media": "#E58A00"}.get(row['gravedad'], "#0FA38F"),
                                 [("Tanque", row['id_tanque']), ("Propietario", str(row.get('cliente', '—')).split(" · ")[0]),
                                  ("Fecha", row['fecha_hora'].strftime("%d/%m/%Y %H:%M") if pd.notna(row['fecha_hora']) else "—"), ("Atención", "Atendida" if row['atendida'] == 1 else "Pendiente")]),
+                    tooltip=folium.Tooltip(f"{row['id_alerta']}<i>{row['gravedad']} · tanque {row['id_tanque']}</i>"),
                     icon=folium.Icon(color=color, icon="warning-sign")
                 ).add_to(mf)
             with a: st_folium(mf, width="100%", height=440, returned_objects=[]); a.caption("Cómo leerlo: cada pin es una alerta. Rojo = gravedad alta, naranja = media, verde = leve.")
