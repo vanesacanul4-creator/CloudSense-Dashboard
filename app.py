@@ -302,6 +302,38 @@ def make_demo():
     return _fechas({"Tanques": mk(tq, "Tanques"), "Reabastecimientos": mk(rec, "Reabastecimientos"), "Lecturas_Bascula": mk(lect, "Lecturas_Bascula"),
                     "Fugas": mk(fu, "Fugas"), "Pruebas": mk(pr, "Pruebas")})
 
+# ---- Base de datos de la app (en vivo): vistas dash.* creadas por sql/02_vistas_dashboard.sql
+VISTAS = {"Tanques": "tanques", "Reabastecimientos": "reabastecimientos", "Lecturas_Bascula": "lecturas_bascula", "Fugas": "fugas"}
+NUMERICAS = {"Tanques": ["capacidad_kg", "latitud", "longitud"],
+             "Reabastecimientos": ["kg_cargados", "nivel_antes_pct", "nivel_despues_pct", "precio_kg", "monto", "dias_desde_ultima_recarga"],
+             "Lecturas_Bascula": ["peso_kg", "nivel_pct"],
+             "Fugas": ["nivel_mq6", "caida_peso_pct", "duracion_min", "kg_perdidos_estimados", "tiempo_respuesta_min", "atendida"]}
+
+@st.cache_data(ttl=30, show_spinner=False)
+def load_app_db():
+    """Lee en vivo las vistas de solo lectura de la BD de la app. Devuelve (hojas, None) o (None, motivo)."""
+    try:
+        con = st.connection("app", type="sql")
+        out = {}
+        for hoja, vista in VISTAS.items():
+            df = con.query(f"SELECT * FROM dash.{vista}", ttl=0).reindex(columns=SHEETS[hoja])
+            for c in NUMERICAS[hoja]: df[c] = pd.to_numeric(df[c], errors="coerce")
+            out[hoja] = df
+        for h in ("Reabastecimientos", "Lecturas_Bascula", "Fugas"):
+            out[h] = _fechas({"Reabastecimientos": out["Reabastecimientos"], "Lecturas_Bascula": out["Lecturas_Bascula"], "Fugas": out["Fugas"]})[h]
+        return out, None
+    except Exception as e:
+        return None, type(e).__name__
+
+def combinar(base, app, modo):
+    """Une el Excel con la BD de la app. 'Pruebas' siempre sale del Excel (los 30 ensayos)."""
+    if app is None or modo == "Solo Excel": return base
+    out = {"Pruebas": base["Pruebas"]}
+    for h in VISTAS:
+        partes = [df for df in ((app[h],) if modo == "Solo base de la app" else (base[h], app[h])) if not df.empty]
+        out[h] = pd.concat(partes, ignore_index=True) if partes else pd.DataFrame(columns=SHEETS[h])
+    return out
+
 @st.cache_data(show_spinner=False)
 def load_sensores():
     p = DATA / "lecturas_dw.csv"
@@ -321,7 +353,19 @@ with st.sidebar.expander("Opciones del tablero"):
     EXPLICA = st.toggle("Guía de lectura en cada gráfica", value=True, key="explica")
     DEMO = st.toggle("Vista previa de diseño", value=False, key="demo")
     up = st.file_uploader("Cargar Excel de pruebas", type="xlsx")
-D, INFO = (make_demo(), None) if DEMO else load_excel(up if up else DATA / "Plantilla_CloudSense.xlsx")
+with st.sidebar.expander("Datos en vivo (base de la app)", expanded=True):
+    FUENTE = st.radio("Fuente de los datos", ["Excel + base de la app", "Solo base de la app", "Solo Excel"], key="fuente",
+                      help="La base de la app se lee en vivo: un tanque o alerta nuevos aparecen aquí sin tocar ningún archivo.")
+    FUENTE = {"Excel + base de la app": "Excel + base", "Solo base de la app": "Solo base de la app", "Solo Excel": "Solo Excel"}[FUENTE]
+    if st.button("Actualizar ahora", icon=":material/refresh:", width="stretch"): st.cache_data.clear()
+    if st.toggle("Actualizar solo cada 30 s", value=False, key="auto_refresh_on"):
+        try:
+            from streamlit_autorefresh import st_autorefresh
+            st_autorefresh(interval=30000, key="auto_refresh")
+        except ImportError: st.caption("Falta instalar streamlit-autorefresh.")
+BASE_X, INFO = (make_demo(), None) if DEMO else load_excel(up if up else DATA / "Plantilla_CloudSense.xlsx")
+APP, APP_ERR = (None, "vista previa") if DEMO else load_app_db()
+D = combinar(BASE_X, APP, FUENTE)
 SENS, DE_DW = load_sensores()
 if INFO:
     with st.sidebar.expander("Datos cargados"):
@@ -334,7 +378,13 @@ with st.sidebar.popover("Abrir en el celular", icon=":material/qr_code_2:", widt
         _b = io.BytesIO(); segno.make(_url, error="m").save(_b, kind="png", scale=8, border=2, dark="#1B3A5C", light="#FFFFFF")
         st.image(_b.getvalue(), width=220); st.caption("Escanea el código con la cámara del celular.")
     else: st.caption("Pega el enlace público del tablero y aquí aparecerá su código QR.")
-st.sidebar.caption("Fuente de datos: " + ("datos de ejemplo" if DEMO else ("Excel cargado" if up else "Plantilla_CloudSense.xlsx")))
+if DEMO: _fuente_txt = "datos de ejemplo"
+elif APP is not None and FUENTE == "Solo base de la app": _fuente_txt = "base de la app (en vivo)"
+elif APP is not None and FUENTE == "Excel + base": _fuente_txt = ("Excel cargado" if up else "Plantilla_CloudSense.xlsx") + " + base de la app (en vivo)"
+else: _fuente_txt = "Excel cargado" if up else "Plantilla_CloudSense.xlsx"
+st.sidebar.caption("Fuente de datos: " + _fuente_txt)
+st.sidebar.caption("Base de la app: " + (f"conectada · {len(APP['Tanques'])} tanques · {len(APP['Fugas'])} alertas · {pd.Timestamp.now():%H:%M:%S}" if APP is not None
+                                         else f"sin conexión ({APP_ERR}); se usa el Excel"))
 st.sidebar.caption("Minería: " + MIN["fuente"])
 
 # ------------------------------------------------------------------ utilidades
@@ -401,6 +451,13 @@ def kpi_card(valor, titulo, rango=(0, 100), color=TERRACOTA, sufijo="%"):
     """, unsafe_allow_html=True)
 
 def estado_de(d, rojo, amar): return "Crítico" if d <= rojo else ("Atención" if d <= amar else "Normal")
+
+def _encuadre(mapa, df):
+    """Si algún punto cae lejos de Tizimín (p. ej. un tanque nuevo registrado en otra ciudad), ajusta el mapa para que se vea."""
+    p = df.dropna(subset=["latitud", "longitud"])
+    if p.empty: return
+    if ((p["latitud"] - 21.143).abs() > .08).any() or ((p["longitud"] + 88.15).abs() > .08).any():
+        mapa.fit_bounds([[p["latitud"].min(), p["longitud"].min()], [p["latitud"].max(), p["longitud"].max()]], max_zoom=15)
 
 def predecir(tanques, lect, reserva_pct, rojo, amar, ventana):
     filas = []
@@ -505,7 +562,7 @@ def analisis1():
     vista = st.segmented_control("Vista", ["Reabastecimiento (R1)", "Sensores de gas", "Encuesta de mercado"], default="Reabastecimiento (R1)", label_visibility="collapsed", key="v1") or "Reabastecimiento (R1)"
     if vista.startswith("Reabast"):
         rec, tq = D["Reabastecimientos"], D["Tanques"]
-        if rec.empty or tq.empty: vacio("Reabastecimientos", "los kilogramos de gas entregados por zona, tipo de cliente y semestre"); return
+        if tq.empty: vacio("Tanques", "el mapa de tanques y los kilogramos entregados por zona, tipo de cliente y semestre"); return
         
         sec("Mapa de Cobertura Parcial")
         st.write("A continuación se muestra la ubicación de los tanques registrados en Tizimín y sus alrededores. Si hay una alerta de fuga, el punto se marcará en rojo.")
@@ -514,11 +571,12 @@ def analisis1():
         if not tq.dropna(subset=['latitud', 'longitud']).empty:
             # Centro en Tizimín
             m = folium.Map(location=[21.143, -88.15], zoom_start=13, tiles="OpenStreetMap")
+            _encuadre(m, tq)
+            pendientes = set(D["Fugas"].loc[D["Fugas"]["atendida"] == 0, "id_tanque"])
             
             for _, row in tq.dropna(subset=['latitud', 'longitud']).iterrows():
-                # Determinamos color según si tiene fugas (simulado para el demo)
-                color_punto = "blue"
-                # Aquí podrías agregar lógica real: if row['id_tanque'] en alertas: color_punto = "red"
+                # Rojo si el tanque tiene una alerta sin atender; azul si está normal
+                color_punto = "red" if row['id_tanque'] in pendientes else "blue"
                 
                 folium.Marker(
                     [row['latitud'], row['longitud']],
@@ -531,6 +589,7 @@ def analisis1():
         else:
             st.caption("No hay datos de latitud/longitud en la hoja Tanques.")
         
+        if rec.empty: vacio("Reabastecimientos", "los kilogramos de gas entregados por zona, tipo de cliente y semestre"); return
         m = rec.merge(tq[["id_tanque", "zona", "tipo_cliente"]], on="id_tanque", how="left")
         m["semestre"] = m["fecha"].dt.year.astype("Int64").astype(str) + "-S" + np.where(m["fecha"].dt.month <= 6, "1", "2")
         c1, c2, c3 = st.columns([1.2, 1.2, 1.4])
@@ -635,6 +694,7 @@ def analisis3():
         if len(ll):
             # Mapa de fugas con Folium
             mf = folium.Map(location=[21.143, -88.15], zoom_start=13, tiles="OpenStreetMap")
+            _encuadre(mf, ll)
             for _, row in ll.iterrows():
                 color = "red" if row['gravedad'] == "Alta" else ("orange" if row['gravedad'] == "Media" else "green")
                 folium.Marker(

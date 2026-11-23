@@ -26,3 +26,10 @@
 1. Sube la carpeta a un repositorio de GitHub (si es público, revisa que el Excel no tenga datos personales).
 2. En share.streamlit.io: New app → tu repo → `app.py` → Deploy. El enlace queda abierto sin pedir permisos.
 3. Para actualizar datos: reemplaza el Excel en el repositorio y la app se actualiza.
+
+## Datos en vivo desde la base de la app (U3A4)
+El tablero lee la base `cloudsense` de la app (tanques, ubicaciones, lecturas, alertas) por medio de cuatro vistas de solo lectura del esquema `dash`.
+1. En el servidor: `sudo -u postgres psql -d cloudsense < 02_vistas_dashboard.sql` (carpeta `sql/`). No modifica datos de la app.
+2. En Streamlit Cloud → Settings → Secrets, agrega un bloque `[connections.app]` igual a `[connections.postgresql]` pero con `database = "cloudsense"`.
+3. Un tanque o alerta nuevos en la app aparecen en los mapas en menos de 30 s (o con el botón "Actualizar ahora" del menú lateral).
+4. Si la base no responde, el tablero usa el Excel como respaldo. Los ids de la app llevan el prefijo `APP-`.
