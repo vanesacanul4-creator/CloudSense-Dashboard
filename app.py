@@ -27,19 +27,14 @@ ESTADO_COL = {"Crítico": BRICK, "Atención": MUSTARD, "Normal": TEAL, "Sin cons
 st.set_page_config(page_title="C.L.O.U.D. Sense", page_icon=str(ASSETS / "icono.png"), layout="wide", initial_sidebar_state="auto")
 st.logo(str(ASSETS / "logo_horizontal.png"), icon_image=str(ASSETS / "icono.png"), size="large")
 
-# CSS Editorial
+# CSS Editorial · una sola familia tipográfica (IBM Plex Sans) para todo el tablero
 st.markdown(f"""<style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
 
-html, body, p, label, li, td, th, input, textarea, a {{
-    font-family: 'IBM Plex Sans', sans-serif;
-    color: {TEXT} !important;
-}}
-h1, h2, h3, h4, h5 {{
-    font-family: 'DM Serif Display', serif !important;
-    color: {NAVY} !important;
-    font-weight: normal;
-}}
+.stApp, .stApp * {{ font-family: 'IBM Plex Sans', system-ui, sans-serif !important; }}
+.stApp [data-testid="stIconMaterial"], .stApp [class*="material-symbols"] {{ font-family: 'Material Symbols Rounded', 'Material Symbols Outlined' !important; }}
+html, body, p, label, li, td, th, input, textarea, a {{ color: {TEXT}; }}
+h1, h2, h3, h4, h5 {{ color: {NAVY} !important; font-weight: 600 !important; letter-spacing: -0.01em; }}
 .block-container {{ padding-top: 2rem; padding-bottom: 2rem; max-width: 1400px; }}
 
 /* Ocultar barra superior SOLO en escritorio */
@@ -49,200 +44,106 @@ h1, h2, h3, h4, h5 {{
 }}
 
 /* Sidebar Azul Profundo */
-section[data-testid="stSidebar"] {{
-    background-color: {NAVY} !important;
-}}
-/* Forzar letras claras en todo el sidebar */
-section[data-testid="stSidebar"] * {{
-    color: #F4F1EA !important;
-}}
-/* Ocultar los recuadros grises de los expanders */
-section[data-testid="stSidebar"] div[data-testid="stExpander"] {{
-    border: none !important;
-    background-color: transparent !important;
-}}
-section[data-testid="stSidebar"] div[data-testid="stExpander"] summary {{
-    background-color: transparent !important;
-    border-bottom: 1px solid #2E5075;
-}}
-section[data-testid="stSidebar"] div[data-testid="stExpander"] div[role="region"] {{
-    background-color: transparent !important;
-}}
+section[data-testid="stSidebar"] {{ background-color: {NAVY} !important; }}
+section[data-testid="stSidebar"] * {{ color: #F4F1EA !important; }}
+section[data-testid="stSidebar"] div[data-testid="stExpander"] {{ border: none !important; background-color: transparent !important; }}
+section[data-testid="stSidebar"] div[data-testid="stExpander"] summary {{ background-color: transparent !important; border-bottom: 1px solid #2E5075; }}
+section[data-testid="stSidebar"] div[data-testid="stExpander"] div[role="region"] {{ background-color: transparent !important; }}
 
 /* Enlaces del Sidebar */
-a[data-testid="stSidebarNavLink"] {{
-    background: transparent;
-    border: 1px solid transparent;
-    border-radius: 0px;
-    padding: 0.75rem 0.5rem;
-    margin-bottom: 0.2rem;
-    border-bottom: 1px solid #2E5075;
-    transition: all 0.2s;
-}}
-a[data-testid="stSidebarNavLink"] span {{ font-size: 0.9rem; font-weight: 400; color: #D1D5DB !important; }}
+a[data-testid="stSidebarNavLink"] {{ background: transparent; border: 1px solid transparent; border-radius: 0px; padding: 0.75rem 0.5rem; margin-bottom: 0.2rem; border-bottom: 1px solid #2E5075; transition: all 0.2s; }}
+a[data-testid="stSidebarNavLink"] span {{ font-size: 0.92rem; font-weight: 400; color: #D1D5DB !important; }}
 a[data-testid="stSidebarNavLink"]:hover {{ background: #24486B; padding-left: 1rem; }}
-a[data-testid="stSidebarNavLink"][aria-current="page"] {{
-    background: {TERRACOTA};
-    border-bottom: 1px solid {TERRACOTA};
-}}
+a[data-testid="stSidebarNavLink"][aria-current="page"] {{ background: {TERRACOTA}; border-bottom: 1px solid {TERRACOTA}; }}
 a[data-testid="stSidebarNavLink"][aria-current="page"] span {{ color: #fff !important; font-weight: 600; }}
 
-/* Encabezado Principal (Header) */
-.hdr {{
-    background: #FFFFFF;
-    border-radius: 4px;
-    padding: 24px 28px;
-    margin-bottom: 24px;
-    border-bottom: 4px solid {TERRACOTA};
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    display: flex;
-    flex-direction: column;
-}}
-.hdr .tag {{
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.75rem;
-    letter-spacing: 0.1em;
-    color: {MUTED} !important;
-    font-weight: 600;
-    text-transform: uppercase;
-    margin-bottom: 6px;
-}}
-.hdr h1 {{ margin: 0; font-size: 2.4rem; color: {NAVY} !important; padding: 0; line-height: 1.2; }}
-.hdr p {{ margin: 8px 0 0 0; color: {MUTED} !important; font-size: 1.05rem; font-family: 'IBM Plex Sans', sans-serif; }}
+/* Encabezado principal */
+.hdr {{ background: #FFFFFF; border-radius: 6px; padding: 24px 28px; margin-bottom: 24px; border-bottom: 4px solid {TERRACOTA}; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; flex-direction: column; }}
+.hdr .tag {{ font-size: 0.72rem; letter-spacing: 0.14em; color: {MUTED} !important; font-weight: 600; text-transform: uppercase; margin-bottom: 6px; }}
+.hdr h1 {{ margin: 0; font-size: 2.2rem; color: {NAVY} !important; padding: 0; line-height: 1.15; font-weight: 700 !important; }}
+.hdr p {{ margin: 8px 0 0 0; color: {MUTED} !important; font-size: 1.05rem; }}
+.demo {{ background: #FFF3E0; color: #B45F06 !important; font-size: 0.8rem; border-left: 4px solid #B45F06; padding: 8px 16px; margin-bottom: 20px; }}
 
-/* Banner de Demo */
-.demo {{
-    background: #FFF3E0;
-    color: #B45F06 !important;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.8rem;
-    border-left: 4px solid #B45F06;
-    padding: 8px 16px;
-    margin-bottom: 20px;
-}}
-
-/* Tarjetas Técnicas */
-.card {{
-    background: #FFFFFF;
-    border: 1px solid {BORDER};
-    border-radius: 4px;
-    padding: 16px 20px;
-    margin-bottom: 12px;
-}}
+/* Tarjetas y notas */
+.card {{ background: #FFFFFF; border: 1px solid {BORDER}; border-radius: 6px; padding: 16px 20px; margin-bottom: 12px; }}
 .card * {{ color: {TEXT} !important; }}
-.card b.t {{ color: {TERRACOTA} !important; font-family: 'IBM Plex Mono', monospace; font-size: 0.85rem; text-transform: uppercase; }}
+.nota {{ background: #FFFFFF; border: 1px solid {BORDER}; border-left: 4px solid {MUSTARD}; border-radius: 6px; padding: 14px 18px; font-size: 0.95rem; margin-bottom: 10px; }}
+.nota b {{ color: {NAVY} !important; }}
 
-/* Títulos de Sección */
-.sec {{
-    font-family: 'DM Serif Display', serif;
-    font-size: 1.5rem;
-    margin: 32px 0 16px 0;
-    color: {NAVY} !important;
-    display: flex;
-    align-items: center;
-    border-bottom: 1px solid {BORDER};
-    padding-bottom: 8px;
-}}
-.sec span {{
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.9rem;
-    color: {TERRACOTA} !important;
-    margin-right: 12px;
-    background: #FFF;
-    border: 1px solid {BORDER};
-    padding: 2px 8px;
-    border-radius: 2px;
-}}
+/* Títulos de sección */
+.sec {{ font-size: 1.35rem; font-weight: 600; margin: 34px 0 16px 0; color: {NAVY} !important; display: flex; align-items: center; border-bottom: 1px solid {BORDER}; padding-bottom: 8px; }}
+.sec span {{ font-size: 0.85rem; font-weight: 600; color: {TERRACOTA} !important; margin-right: 12px; background: #FFF; border: 1px solid {BORDER}; padding: 2px 8px; border-radius: 4px; font-variant-numeric: tabular-nums; }}
 
-/* Bloque Entender-Analizar-Proponer */
-.eap {{
-    background: #FFFFFF;
-    border: 1px solid {BORDER};
-    border-left: 4px solid {NAVY};
-    padding: 8px 20px;
-    margin-top: 16px;
-}}
-.eap div {{ padding: 10px 0; border-bottom: 1px solid {BORDER}; font-size: 0.95rem; color: {TEXT} !important; }}
-.eap div:last-child {{ border-bottom: 0; }}
-.eap b {{
-    font-family: 'IBM Plex Mono', monospace;
-    color: {TERRACOTA} !important;
-    display: inline-block;
-    min-width: 100px;
-    font-size: 0.85rem;
-    text-transform: uppercase;
-}}
+/* Métricas nativas */
+[data-testid="stMetric"] {{ background: #FFFFFF; border: 1px solid {BORDER}; border-radius: 6px; padding: 16px; }}
+[data-testid="stMetricLabel"] {{ color: {MUTED} !important; font-size: 0.85rem; }}
+[data-testid="stMetricValue"] {{ color: {NAVY} !important; font-weight: 700; font-variant-numeric: tabular-nums; }}
 
-/* Métricas (st.metric) */
-[data-testid="stMetric"] {{
-    background: #FFFFFF;
-    border: 1px solid {BORDER};
-    border-radius: 4px;
-    padding: 16px;
-}}
-[data-testid="stMetricLabel"] {{ font-family: 'IBM Plex Sans', sans-serif; color: {MUTED} !important; font-size: 0.85rem; }}
-[data-testid="stMetricValue"] {{
-    font-family: 'IBM Plex Mono', monospace;
-    color: {NAVY} !important;
-    font-weight: 600;
-}}
+/* Tarjetas de indicador que giran: por delante el dato, por detrás qué significa */
+.flip {{ perspective: 1000px; height: 150px; margin-bottom: 10px; outline: none; }}
+.flip-in {{ position: relative; width: 100%; height: 100%; transition: transform .55s cubic-bezier(.4,.2,.2,1); transform-style: preserve-3d; }}
+.flip:hover .flip-in, .flip:focus .flip-in, .flip:focus-within .flip-in {{ transform: rotateY(180deg); }}
+.flip-f, .flip-b {{ position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: 6px; padding: 16px 18px; box-sizing: border-box; }}
+.flip-f {{ background: #FFFFFF; border: 1px solid {BORDER}; display: flex; flex-direction: column; justify-content: space-between; }}
+.flip-b {{ background: {NAVY}; transform: rotateY(180deg); font-size: 0.84rem; line-height: 1.42; overflow: hidden; }}
+.flip-b, .flip-b * {{ color: #F4F1EA !important; }}
+.flip-bt {{ font-weight: 700; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: #E8B796 !important; margin-bottom: 6px; }}
+.flip-v {{ font-size: 2rem; font-weight: 700; color: {NAVY} !important; line-height: 1; font-variant-numeric: tabular-nums; }}
+.flip-t {{ font-size: 0.78rem; color: {MUTED} !important; text-transform: uppercase; letter-spacing: 0.07em; margin-top: 8px; font-weight: 500; }}
+.flip-i {{ position: absolute; top: 10px; right: 12px; width: 18px; height: 18px; border-radius: 50%; border: 1px solid {BORDER}; color: {MUTED} !important; font-size: 0.68rem; display: flex; align-items: center; justify-content: center; }}
+.kpi-bar {{ height: 6px; background: #E5E7EB; border-radius: 3px; margin-top: 10px; overflow: hidden; }}
+.kpi-bar-fill {{ height: 100%; border-radius: 3px; }}
+.kpi-card {{ background: #FFFFFF; border: 1px solid {BORDER}; border-radius: 6px; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; height: 120px; }}
+.kpi-val {{ font-size: 2.2rem; font-weight: 700; color: {NAVY} !important; line-height: 1; margin-bottom: 8px; }}
+.kpi-title {{ font-size: 0.85rem; color: {MUTED} !important; text-transform: uppercase; letter-spacing: 0.05em; }}
 
-/* KPI Card */
-.kpi-card {{
-    background: #FFFFFF;
-    border: 1px solid {BORDER};
-    border-radius: 4px;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    height: 120px;
-}}
-.kpi-val {{
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 2.2rem;
-    font-weight: 600;
-    color: {NAVY} !important;
-    line-height: 1;
-    margin-bottom: 8px;
-}}
-.kpi-title {{
-    font-family: 'IBM Plex Sans', sans-serif;
-    font-size: 0.85rem;
-    color: {MUTED} !important;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}}
-.kpi-bar {{
-    height: 6px;
-    background: #E5E7EB;
-    border-radius: 3px;
-    margin-top: 12px;
-    overflow: hidden;
-}}
-.kpi-bar-fill {{
-    height: 100%;
-    border-radius: 3px;
-}}
+/* Guía de lectura interactiva */
+.guia-h {{ font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: {MUTED} !important; font-weight: 600; margin: 26px 0 6px; }}
+.guia-b {{ background: #FFFFFF; border: 1px solid {BORDER}; border-left: 4px solid {TERRACOTA}; border-radius: 4px; padding: 14px 18px; font-size: 0.97rem; margin-top: 6px; }}
 
-/* Botones y Filtros (Main Content) */
-div[data-testid="stSegmentedControl"] button {{
-    background-color: #FFFFFF !important; 
-    border: 1px solid {BORDER} !important; 
-    color: {NAVY} !important;
-}}
-div[data-testid="stSegmentedControl"] button[aria-checked="true"] {{ 
-    background-color: {NAVY} !important; 
-    color: #FFF !important; 
-}}
+/* Filtros */
+.filtro-t {{ font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.09em; color: {MUTED} !important; margin: 6px 0 2px; }}
+button[data-testid="stBaseButton-pills"] {{ background: #FFFFFF !important; border: 1px solid {BORDER} !important; color: {NAVY} !important; border-radius: 999px !important; }}
+button[data-testid="stBaseButton-pillsActive"] {{ background: {NAVY} !important; border: 1px solid {NAVY} !important; border-radius: 999px !important; }}
+button[data-testid="stBaseButton-pillsActive"], button[data-testid="stBaseButton-pillsActive"] * {{ color: #FFFFFF !important; }}
+div[data-testid="stSegmentedControl"] button {{ background-color: #FFFFFF !important; border: 1px solid {BORDER} !important; color: {NAVY} !important; }}
+div[data-testid="stSegmentedControl"] button[aria-checked="true"] {{ background-color: {NAVY} !important; color: #FFF !important; }}
 [data-baseweb="tab-list"] button span {{ color: {TEXT} !important; }}
 [data-baseweb="tab-list"] button[aria-selected="true"] span {{ color: {NAVY} !important; font-weight: 600; }}
 
-/* Textura de Fondo Sutil (Papel) */
-[data-testid="stAppViewContainer"] {{
-    background-color: {PAPER};
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
-}}
+/* Botones principales (entrar, ver detalle) */
+button[data-testid="stBaseButton-primary"] {{ background: {TERRACOTA} !important; border: 1px solid {TERRACOTA} !important; border-radius: 6px !important; }}
+button[data-testid="stBaseButton-primary"], button[data-testid="stBaseButton-primary"] * {{ color: #FFFFFF !important; font-weight: 600; }}
+button[data-testid="stBaseButton-primary"]:hover {{ background: #A04A22 !important; }}
+button[data-testid="stBaseButton-secondary"] {{ border: 1px solid {NAVY} !important; border-radius: 6px !important; background: #FFFFFF !important; }}
+button[data-testid="stBaseButton-secondary"], button[data-testid="stBaseButton-secondary"] * {{ color: {NAVY} !important; font-weight: 500; }}
+button[data-testid="stBaseButton-secondary"]:hover {{ background: {NAVY} !important; }}
+button[data-testid="stBaseButton-secondary"]:hover, button[data-testid="stBaseButton-secondary"]:hover * {{ color: #FFFFFF !important; }}
+section[data-testid="stSidebar"] button[data-testid="stBaseButton-secondary"] {{ background: transparent !important; border: 1px solid #5B7FA3 !important; }}
+section[data-testid="stSidebar"] button[data-testid="stBaseButton-secondary"] * {{ color: #F4F1EA !important; }}
+
+/* Ventanas flotantes (popovers y diálogos) */
+[data-testid="stPopoverBody"] {{ background: #FFFFFF !important; border: 1px solid {BORDER} !important; border-radius: 12px !important; box-shadow: 0 14px 36px rgba(27,58,92,.20) !important; padding: 18px 20px !important; }}
+div[role="dialog"] {{ border-radius: 14px !important; box-shadow: 0 20px 48px rgba(27,58,92,.28) !important; }}
+div[role="dialog"] h2 {{ font-size: 1.3rem !important; }}
+
+/* Inicio: recorrido (solo informativo) y tarjetas de entrada (con botón) */
+.steps {{ display: flex; margin: 10px 0 6px; }}
+.step {{ flex: 1; text-align: center; position: relative; padding: 0 12px; }}
+.step .n {{ width: 46px; height: 46px; border-radius: 50%; background: {NAVY}; color: #FFFFFF !important; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem; margin: 0 auto 10px; position: relative; z-index: 1; }}
+.step:not(:last-child)::after {{ content: ""; position: absolute; top: 23px; left: calc(50% + 32px); right: calc(-50% + 32px); border-top: 2px dashed #B9B2A3; }}
+.step b {{ display: block; color: {NAVY} !important; font-size: 1.05rem; margin-bottom: 2px; }}
+.step span {{ color: {MUTED} !important; font-size: 0.9rem; line-height: 1.35; display: block; }}
+@media (max-width: 768px) {{ .steps {{ flex-direction: column; gap: 14px; }} .step:not(:last-child)::after {{ display: none; }} }}
+[class*="st-key-tile_"] {{ background: #FFFFFF; border: 1px solid {BORDER} !important; border-top: 4px solid {TERRACOTA} !important; border-radius: 6px !important; min-height: 215px; box-shadow: 0 1px 3px rgba(0,0,0,.05); }}
+
+/* Prioridades */
+.prio {{ display: flex; gap: 14px; align-items: flex-start; background: #FFFFFF; border: 1px solid {BORDER}; border-radius: 6px; padding: 14px 16px; margin-bottom: 8px; font-size: 0.96rem; }}
+.prio b {{ color: {NAVY} !important; }}
+.chip {{ flex: none; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.09em; padding: 4px 10px; border-radius: 999px; color: #FFFFFF !important; margin-top: 2px; min-width: 88px; text-align: center; }}
+
+/* Fondo de papel */
+[data-testid="stAppViewContainer"] {{ background-color: {PAPER}; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E"); }}
 </style>""", unsafe_allow_html=True)
 
 # ------------------------------------------------------------------ datos
@@ -406,9 +307,6 @@ def vacio(hoja, para):
         st.write(f"Esta sección mostrará **{para}** en cuanto se cargue la hoja **{hoja}** de la plantilla Excel.")
         st.caption("Columnas esperadas: " + ", ".join(SHEETS[hoja]))
 
-def eap(e, a, p):
-    st.markdown(f'<div class="eap"><div><b>Entender</b>{e}</div><div><b>Analizar</b>{a}</div><div><b>Proponer</b>{p}</div></div>', unsafe_allow_html=True)
-
 def style(fig, h=380):
     fig.update_layout(
         height=h, 
@@ -418,7 +316,7 @@ def style(fig, h=380):
         margin=dict(l=10, r=10, t=50, b=10),
         colorway=[TERRACOTA, NAVY, MUSTARD, TEAL, BRICK, "#94A3B8"],
         legend=dict(orientation="h", y=-0.2, title=None, font=dict(color=TEXT)),
-        title=dict(font=dict(family="DM Serif Display, serif", size=18, color=NAVY))
+        title=dict(font=dict(family="IBM Plex Sans, sans-serif", size=17, color=NAVY))
     )
     fig.update_xaxes(gridcolor=BORDER, zerolinecolor=BORDER, tickfont=dict(family="IBM Plex Sans", color=TEXT))
     fig.update_yaxes(gridcolor=BORDER, zerolinecolor=BORDER, tickfont=dict(family="IBM Plex Sans", color=TEXT))
@@ -431,24 +329,44 @@ def color_estado(v):
     c = {"Crítico": BRICK, "Pendiente": BRICK, "Atención": MUSTARD, "Lenta": MUSTARD, "Normal": TEAL, "Rápida": TEAL}.get(v)
     return f"background-color:{c};color:#FFF;font-weight:600" if c else ""
 
-def kpi_card(valor, titulo, rango=(0, 100), color=TERRACOTA, sufijo="%"):
-    try:
-        v_float = float(valor)
-    except (ValueError, TypeError):
-        v_float = 0.0
-        
+import hashlib
+
+def eap(e, a, p):
+    """Guía de lectura interactiva: tres opciones y el texto cambia según la que se toque."""
+    k = "g_" + hashlib.md5(e.encode("utf-8")).hexdigest()[:10]
+    st.markdown('<div class="guia-h">Guía rápida de esta sección</div>', unsafe_allow_html=True)
+    op = st.pills("Guía", ["Qué estoy viendo", "Qué me dice", "Qué puedo hacer"], key=k, label_visibility="collapsed")
+    txt = {"Qué estoy viendo": e, "Qué me dice": a, "Qué puedo hacer": p}.get(op)
+    if txt: st.markdown(f'<div class="guia-b">{txt}</div>', unsafe_allow_html=True)
+    else: st.caption("Toca una de las tres opciones para leer la explicación.")
+
+def filtro(label, opciones, key, ayuda):
+    """Filtro con chips: toca uno o varios; sin selección se muestran todos. Devuelve la lista elegida (o todas)."""
+    opciones = list(opciones)
+    st.markdown(f'<div class="filtro-t">{label}</div>', unsafe_allow_html=True)
+    sel = list(st.pills(label, opciones, selection_mode="multi", key=key, label_visibility="collapsed") or [])
+    if sel: st.button("Ver todos", key=key + "_x", icon=":material/close:", on_click=lambda: st.session_state.update({key: []}))
+    else: st.caption(ayuda)
+    return sel or opciones
+
+def _flip(valor, titulo, explicacion, color=NAVY, barra=None):
+    b = f'<div class="kpi-bar"><div class="kpi-bar-fill" style="width:{barra:.0f}%;background-color:{color}"></div></div>' if barra is not None else ""
+    return (f'<div class="flip" tabindex="0"><div class="flip-in"><div class="flip-f"><div><div class="flip-v">{valor}</div><div class="flip-t">{titulo}</div></div>{b}<span class="flip-i">?</span></div>'
+            f'<div class="flip-b"><div class="flip-bt">{titulo}</div>{explicacion}</div></div></div>')
+
+def kpis(items, color=NAVY):
+    """Fila de indicadores que giran. items = [(título, valor, explicación en palabras simples), ...]"""
+    for col, (t, v, e) in zip(st.columns(len(items)), items):
+        col.markdown(_flip(v, t, e, color), unsafe_allow_html=True)
+
+def kpi_card(valor, titulo, rango=(0, 100), color=TERRACOTA, sufijo="%", explicacion=None):
+    try: v_float = float(valor)
+    except (ValueError, TypeError): v_float = 0.0
     pct = max(0, min(100, (v_float - rango[0]) / (rango[1] - rango[0]) * 100)) if rango[1] > rango[0] else 0
-    st.markdown(f"""
-    <div class="kpi-card">
-        <div>
-            <div class="kpi-val">{valor}{sufijo}</div>
-            <div class="kpi-title">{titulo}</div>
-        </div>
-        <div class="kpi-bar">
-            <div class="kpi-bar-fill" style="width: {pct}%; background-color: {color};"></div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    if explicacion:
+        st.markdown(_flip(f"{valor}{sufijo}", titulo, explicacion, color, pct), unsafe_allow_html=True); return
+    st.markdown(f"""<div class="kpi-card"><div><div class="kpi-val">{valor}{sufijo}</div><div class="kpi-title">{titulo}</div></div>
+        <div class="kpi-bar"><div class="kpi-bar-fill" style="width: {pct}%; background-color: {color};"></div></div></div>""", unsafe_allow_html=True)
 
 def estado_de(d, rojo, amar): return "Crítico" if d <= rojo else ("Atención" if d <= amar else "Normal")
 
@@ -488,28 +406,29 @@ def inicio():
         a, b = st.columns([1, 1.6], vertical_alignment="center")
         a.image(str(ASSETS / "logo_vertical.png"), width="stretch")
         b.markdown("### Detecta. Predice. Decide.")
-        b.write("Un prototipo con **sensor de gas MQ-6** y **báscula** vigila cada tanque. Si hay una fuga, **avisa al instante**. Si el gas se está acabando, **calcula cuándo** habrá que reabastecer. "
+        b.write("Un prototipo con **sensor de gas** y **báscula** vigila cada tanque. Si hay una fuga, **avisa al instante**. Si el gas se está acabando, **calcula cuándo** habrá que reabastecer. "
                 "Este tablero reúne todo para tomar mejores decisiones.")
-    sec("Cómo funciona")
-    pasos = [("sensors", "Medir", "El sensor MQ-6 huele el gas y la báscula pesa el tanque."), ("notifications_active", "Alertar", "Una alarma local suena y llega un aviso al celular."),
-             ("database", "Analizar", "Los datos se limpian y se guardan en un almacén de datos."), ("insights", "Decidir", "El tablero muestra qué tanque atender primero.")]
-    for col, (ic, t, d) in zip(st.columns(4), pasos):
-        with col.container(border=True, height=175):
-            n = pasos.index((ic, t, d)) + 1
-            st.markdown(f'<div style="font-family: IBM Plex Mono; color: {TERRACOTA}; font-weight: 600; margin-bottom: 8px;">0{n}</div>', unsafe_allow_html=True)
-            st.markdown(f"**:material/{ic}: {t}**"); st.caption(d)
-    sec("Explora el tablero")
+    sec("Así funciona el sistema")
+    st.caption("Solo informativo: el recorrido de un dato, desde el tanque hasta la decisión.")
+    pasos = [("1", "Medir", "El sensor de gas detecta fugas y la báscula pesa el tanque."), ("2", "Avisar", "Suena una alarma local y llega un aviso al celular."),
+             ("3", "Analizar", "Los datos se limpian y se guardan en una base de datos."), ("4", "Decidir", "Este tablero muestra qué tanque atender primero.")]
+    st.markdown('<div class="steps">' + "".join(f'<div class="step"><div class="n">{n}</div><b>{t}</b><span>{d}</span></div>' for n, t, d in pasos) + '</div>', unsafe_allow_html=True)
+    sec("¿Qué quieres revisar?")
+    st.caption("Toca el botón de una tarjeta para entrar. También puedes moverte con el menú de la izquierda.")
     destinos = [("analisis1", "bar_chart", "Análisis 1 · Descriptivo", "¿Cuánto gas se entrega y cómo responden los sensores?"),
                 ("analisis2", "trending_up", "Análisis 2 · Predictivo", "¿Cuándo se acaba el gas de cada tanque?"),
                 ("analisis3", "gas_meter", "Análisis 3 · Fugas", "¿Dónde hay fugas y qué tan rápido se atienden?"),
-                ("decisiones", "checklist", "Toma de decisiones", "¿Qué hacemos primero?")]
+                ("decisiones", "checklist", "Toma de decisiones", "¿Qué hacemos primero con todo esto?")]
     for col, (pid, ic, t, q) in zip(st.columns(4), destinos):
-        with col.container(border=True, height=195):
-            st.markdown(f"**:material/{ic}: {t}**"); st.caption(q); st.page_link(PAGES[pid], label="Abrir sección", icon=":material/arrow_forward:")
+        with col.container(border=True, key=f"tile_{pid}"):
+            st.markdown(f"**{t}**"); st.write(q)
+            if st.button("Abrir  →", key=f"go_{pid}", type="primary", width="stretch"): st.switch_page(PAGES[pid])
     sec("El sistema en números")
-    k = st.columns(5)
-    k[0].metric("Lecturas de sensores", f"{len(SENS):,}"); k[1].metric("Clases de gas", SENS["clase"].nunique())
-    k[2].metric("Tanques vigilados", len(D["Tanques"])); k[3].metric("Alertas de fuga", len(D["Fugas"])); k[4].metric("Ensayos completados", f"{len(D['Pruebas'])}/30")
+    kpis([("Lecturas de sensores", f"{len(SENS):,}", "Mediciones del sensor de gas con las que se estudió el comportamiento del sistema."),
+          ("Tipos de gas", f"{SENS['clase'].nunique()}", "Clases de olor o gas que el sistema aprendió a distinguir."),
+          ("Tanques vigilados", f"{len(D['Tanques'])}", "Tanques que hoy aparecen registrados y se monitorean."),
+          ("Alertas de fuga", f"{len(D['Fugas'])}", "Avisos que el sistema ha generado."),
+          ("Pruebas hechas", f"{len(D['Pruebas'])}/30", "Ensayos del prototipo completados de los 30 planeados.")])
     st.progress(min(len(D["Pruebas"]) / 30, 1.0), text="Avance de las 30 pruebas del prototipo (10 por escenario)")
     eap("El tablero responde cuatro preguntas de negocio y cierra con acciones concretas.", "Cada sección usa indicadores, gráficas y una guía de lectura.", "Recorre el menú lateral de arriba abajo; la última sección resume qué hacer.")
 
@@ -527,11 +446,10 @@ def encuesta_view():
     if ENC.empty: vacio_encuesta(); return
     n = len(ENC); pc = lambda mask, base: f"{(mask.sum() / max(base.notna().sum(), 1)):.0%}"
     st.caption(f"Encuesta anónima sobre el uso de gas LP · {n} respuestas válidas. Con una muestra mayor (30 a 40) las conclusiones serían más sólidas.")
-    k = st.columns(4)
-    k[0].metric("Se han quedado sin gas", pc(ENC["sin_gas"].isin(["Una vez", "Varias veces"]), ENC["sin_gas"]))
-    k[1].metric("Sospecharon una fuga", pc(ENC["fuga"].isin(["Una vez", "Varias veces"]), ENC["fuga"]))
-    k[2].metric("Utilidad del aviso (1 a 5)", f"{ENC['utilidad'].mean():.1f}", help=f"Mediana {ENC['utilidad'].median():.0f} · Moda {moda(ENC['utilidad'].dropna()):.0f}")
-    k[3].metric("Lo comprarían", pc(ENC["compraria"] == "Sí", ENC["compraria"]))
+    kpis([("Se han quedado sin gas", pc(ENC["sin_gas"].isin(["Una vez", "Varias veces"]), ENC["sin_gas"]), "De las personas encuestadas, las que alguna vez se quedaron sin gas sin esperarlo."),
+          ("Sospecharon una fuga", pc(ENC["fuga"].isin(["Una vez", "Varias veces"]), ENC["fuga"]), "Las que alguna vez creyeron que había una fuga en su casa o negocio."),
+          ("Utilidad del aviso", f"{ENC['utilidad'].mean():.1f} de 5", f"Calificación promedio que le dieron a recibir un aviso. Mediana {ENC['utilidad'].median():.0f}, la más repetida {moda(ENC['utilidad'].dropna()):.0f}."),
+          ("Lo comprarían", pc(ENC["compraria"] == "Sí", ENC["compraria"]), "Las personas que dijeron que sí comprarían el dispositivo si existiera hoy.")])
     sub = st.segmented_control("Tema", ["El problema", "El interés", "Precio y modelo"], default="El problema", key="enc_sub", label_visibility="collapsed") or "El problema"
     if sub == "El problema":
         a, b, c = st.columns(3)
@@ -592,34 +510,43 @@ def analisis1():
         if rec.empty: vacio("Reabastecimientos", "los kilogramos de gas entregados por zona, tipo de cliente y semestre"); return
         m = rec.merge(tq[["id_tanque", "zona", "tipo_cliente"]], on="id_tanque", how="left")
         m["semestre"] = m["fecha"].dt.year.astype("Int64").astype(str) + "-S" + np.where(m["fecha"].dt.month <= 6, "1", "2")
-        c1, c2, c3 = st.columns([1.2, 1.2, 1.4])
-        zonas = c1.multiselect("Zona", sorted(m["zona"].dropna().unique()), default=sorted(m["zona"].dropna().unique()))
-        tipos = c2.multiselect("Tipo de cliente", sorted(m["tipo_cliente"].dropna().unique()), default=sorted(m["tipo_cliente"].dropna().unique()))
-        dim = c3.radio("Agrupar por", ["zona", "tipo_cliente", "semestre"], horizontal=True, format_func=lambda x: {"zona": "Zona", "tipo_cliente": "Tipo de cliente", "semestre": "Semestre"}[x])
+        sec("Filtra lo que quieres ver")
+        f1, f2 = st.columns(2)
+        with f1: zonas = filtro("Zona", sorted(m["zona"].dropna().unique()), "f_zona", "Sin selección se muestran todas. Toca una o varias zonas para filtrar.")
+        with f2: tipos = filtro("Tipo de cliente", sorted(m["tipo_cliente"].dropna().unique()), "f_tipo", "Sin selección se muestran todos. Toca uno o varios para filtrar.")
+        dim = st.segmented_control("Agrupar las gráficas por", ["zona", "tipo_cliente", "semestre"], default="zona", key="f_dim", format_func=lambda x: {"zona": "Zona", "tipo_cliente": "Tipo de cliente", "semestre": "Semestre"}[x]) or "zona"
         m = m[m["zona"].isin(zonas) & m["tipo_cliente"].isin(tipos)]
-        k = st.columns(5)
-        k[0].metric("Gas entregado", f"{m['kg_cargados'].sum():,.0f} kg"); k[1].metric("Recargas", f"{len(m):,}"); k[2].metric("Media por recarga", f"{m['kg_cargados'].mean():,.1f} kg")
-        k[3].metric("Mediana", f"{m['kg_cargados'].median():,.1f} kg"); k[4].metric("Moda", f"{moda(m['kg_cargados']):,.1f} kg")
+        if m.empty: st.info("No hay recargas con esa combinación. Toca “Ver todos” para quitar los filtros."); return
+        sec("Cuánto gas se ha entregado")
+        kpis([("Gas entregado", f"{m['kg_cargados'].sum():,.0f} kg", "Total de kilos de gas entregados con los filtros que elegiste."),
+              ("Recargas", f"{len(m):,}", "Cuántas veces se llenó un tanque."),
+              ("Recarga promedio", f"{m['kg_cargados'].mean():,.1f} kg", "Si el gas se repartiera por igual entre todas las recargas, a cada una le tocaría esta cantidad."),
+              ("Recarga típica", f"{m['kg_cargados'].median():,.1f} kg", "Es la mediana: la mitad de las recargas fue menor a esto y la otra mitad mayor."),
+              ("Recarga más común", f"{moda(m['kg_cargados']):,.1f} kg", "Es la moda: la cantidad que más veces se repite entre las recargas.")])
         g1, g2 = st.columns([1.5, 1])
         with g1:
             g = m.groupby([dim, "semestre" if dim != "semestre" else "tipo_cliente"], as_index=False)["kg_cargados"].sum()
             st.plotly_chart(style(px.bar(g, x=dim, y="kg_cargados", color=g.columns[1], barmode="group", title="Kilogramos entregados", labels={"kg_cargados": "kg entregados", "zona": "Zona", "tipo_cliente": "Tipo de cliente", "semestre": "Semestre"})), width="stretch")
+            como_leer("entre más alta la barra, más kilos de gas se entregaron. Los colores separan los periodos.")
         with g2:
             st.plotly_chart(style(px.pie(m.groupby("tipo_cliente", as_index=False)["kg_cargados"].sum(), names="tipo_cliente", values="kg_cargados", hole=.55, title="Participación por tipo de cliente")), width="stretch")
+            como_leer("cada porción es el porcentaje del gas que se llevó cada tipo de cliente.")
         eap("Cuánto gas se entrega, y a quién, por zona y semestre.", "Compara la altura de las barras para ubicar las zonas y clientes que más consumen.", "Planear rutas de reparto primero hacia las zonas de mayor volumen.")
     elif vista == "Sensores de gas":
         sec("Qué tanto reacciona el sensor MQ-6")
-        u = st.slider("Umbral de alerta del MQ-6", 300, 700, 450, 5)
+        st.markdown('<div class="nota"><b>¿Qué es el umbral?</b> El sensor entrega un número. Si la lectura llega a la línea que elijas, se cuenta como alerta. Línea baja: detecta fugas pequeñas, pero da más falsas alarmas. Línea alta: menos falsas alarmas, pero puede tardar en avisar.</div>', unsafe_allow_html=True)
+        u = st.slider("Línea de alerta (umbral)", 300, 700, 450, 5)
         s = SENS.copy(); s["alerta"] = s["mq6"] >= u; pct = s["alerta"].mean()
         
         c1, c2, c3 = st.columns(3)
-        with c1: kpi_card(f"{len(s):,}", "Lecturas analizadas", color=NAVY, sufijo="")
-        with c2: kpi_card(f"{int(s['alerta'].sum()):,}", "Alertas generadas", color=BRICK, sufijo="")
-        with c3: kpi_card(f"{pct*100:.1f}", "Porcentaje en alerta", color=MUSTARD)
+        with c1: kpi_card(f"{len(s):,}", "Lecturas analizadas", color=NAVY, sufijo="", explicacion="Cuántas mediciones históricas del sensor se están revisando.")
+        with c2: kpi_card(f"{int(s['alerta'].sum()):,}", "Alertas generadas", color=BRICK, sufijo="", explicacion="Cuántas de esas mediciones habrían disparado la alarma con la línea que elegiste.")
+        with c3: kpi_card(f"{pct*100:.1f}", "Porcentaje en alerta", color=MUSTARD, explicacion="De cada 100 mediciones, cuántas habrían disparado la alarma. Si sube mucho, la línea está muy baja.")
         
         xs = np.arange(300, 701, 5); ys = [(s["mq6"] >= x).mean() * 100 for x in xs]
         fig = go.Figure(go.Scatter(x=xs, y=ys, mode="lines", line=dict(color=TERRACOTA, width=3), name="% en alerta")); fig.add_trace(go.Scatter(x=[u], y=[pct * 100], mode="markers", marker=dict(size=14, color=NAVY), name="Umbral elegido"))
-        st.plotly_chart(style(fig.update_layout(title="¿Qué pasa si subo o bajo el umbral?", xaxis_title="Umbral MQ-6", yaxis_title="% de lecturas en alerta"), 280), width="stretch")
+        st.plotly_chart(style(fig.update_layout(title="¿Qué pasa si subo o bajo el umbral?", xaxis_title="Línea de alerta (umbral)", yaxis_title="% de lecturas en alerta"), 280), width="stretch")
+        como_leer("la curva baja al subir la línea: entre más alta, menos alertas. El punto azul es la línea que elegiste.")
         
         sec("La huella de cada gas")
         c1, c2 = st.columns(2)
@@ -627,6 +554,7 @@ def analisis1():
         hm = px.imshow(z.values, x=[m.upper() for m in MQ], y=med.index, aspect="auto", color_continuous_scale=[[0, "#FFFFFF"], [.5, TEAL], [1, TERRACOTA]], title="Respuesta de cada sensor por clase de gas")
         hm.update_traces(text=med.round(0).values, texttemplate="%{text}"); hm.update_coloraxes(showscale=False)
         c1.plotly_chart(style(hm, 360), width="stretch")
+        c1.caption("Cómo leerlo: cada fila es un tipo de gas y cada columna un sensor. Entre más naranja la casilla, más fuerte reacciona ese sensor a ese gas.")
         with c2:
             sel = st.pills("Sensor a comparar", MQ, default="mq6", format_func=str.upper) or "mq6"
             bx = px.box(s, x="clase", y=sel, color="clase", title=f"Distribución de {sel.upper()} por clase", labels={"clase": "Clase", sel: sel.upper()})
@@ -639,22 +567,27 @@ def analisis2():
     _sec_num[0] = 0
     header("Análisis 2 · Predictivo", "R2 · ¿Cuándo habrá que reabastecer cada tanque?")
     lect, tq = D["Lecturas_Bascula"], D["Tanques"]
-    with st.popover("Ajustar el modelo", icon=":material/tune:"):
-        reserva = st.slider("Reserva mínima del tanque (%)", 0, 30, 10); rojo = st.slider("Crítico si quedan (días) ≤", 1, 10, 3)
-        amar = st.slider("Atención si quedan (días) ≤", 3, 30, 7); vent = st.slider("Ventana de consumo (días)", 3, 90, 30)
+    with st.popover("Cambiar cuándo avisar", icon=":material/tune:"):
+        st.markdown("**Reglas de aviso.** Cambian el color y el orden de los tanques, pero no modifican los datos.")
+        reserva = st.slider("Gas de reserva que no se debe gastar (%)", 0, 30, 10, help="Se considera que el tanque “se acaba” cuando llega a este porcentaje, no a cero.")
+        rojo = st.slider("Marcar CRÍTICO si quedan menos de (días)", 1, 10, 3)
+        amar = st.slider("Marcar ATENCIÓN si quedan menos de (días)", 3, 30, 7)
+        vent = st.slider("Días de historial para calcular el consumo", 3, 90, 30, help="Entre más días, más estable el cálculo; menos días reaccionan antes a cambios.")
     if lect.empty: vacio("Lecturas_Bascula", "los tanques ordenados por urgencia y su fecha estimada de agotamiento"); return
     res = predecir(tq, lect, reserva, rojo, amar, vent)
     if res.empty: st.warning("Hay lecturas, pero se necesitan al menos 3 por tanque dentro de la ventana elegida."); return
     
-    k = st.columns(4)
-    k[0].metric("Tanques analizados", len(res)); k[1].metric("Críticos", int((res["estado"] == "Crítico").sum()))
-    k[2].metric("Consumo medio", f"{res['consumo_kg_dia'].mean():.2f} kg/día"); k[3].metric("Mediana de días restantes", f"{res['dias_restantes'].median():.1f}")
+    kpis([("Tanques analizados", f"{len(res)}", "Tanques con suficientes lecturas de la báscula para calcular cuánto les queda."),
+          ("Críticos", f"{int((res['estado'] == 'Crítico').sum())}", "Tanques a los que les quedan muy pocos días de gas. Son los primeros que hay que reabastecer."),
+          ("Consumo medio", f"{res['consumo_kg_dia'].mean():.2f} kg/día", "Cuántos kilos de gas gasta en promedio cada tanque por día."),
+          ("Días restantes típicos", f"{res['dias_restantes'].median():.1f}", "Es la mediana: la mitad de los tanques durará menos que esto y la otra mitad más.")])
     sec("Qué tanque atender primero")
     a, b = st.columns([1, 1.3])
     top = res.dropna(subset=["dias_restantes"]).head(15).iloc[::-1]
     fb = px.bar(top, x="dias_restantes", y="id_tanque", color="estado", color_discrete_map=ESTADO_COL, orientation="h", title="Días restantes por tanque", labels={"dias_restantes": "Días restantes", "id_tanque": "Tanque", "estado": "Estado"}, category_orders={"estado": ["Crítico", "Atención", "Normal"]})
     fb.update_yaxes(categoryorder="array", categoryarray=list(top["id_tanque"]))
     a.plotly_chart(style(fb, 420), width="stretch")
+    a.caption("Cómo leerlo: cada barra es un tanque. Entre más corta la barra, menos días de gas le quedan. Rojo = atender primero.")
     
     cols = ["id_tanque", "zona", "estado", "dias_restantes", "fecha_agotamiento", "nivel_pct", "consumo_kg_dia"]
     b.dataframe(res[cols].style.map(color_estado, subset=["estado"]), hide_index=True, height=420, width="stretch",
@@ -702,27 +635,38 @@ def analisis3():
                     popup=f"Alerta: {row['id_alerta']}<br>Tanque: {row['id_tanque']}<br>Gravedad: {row['gravedad']}",
                     icon=folium.Icon(color=color, icon="warning-sign")
                 ).add_to(mf)
-            with a: st_folium(mf, width="100%", height=440, returned_objects=[])
+            with a: st_folium(mf, width="100%", height=440, returned_objects=[]); a.caption("Cómo leerlo: cada pin es una alerta. Rojo = gravedad alta, naranja = media, verde = leve.")
         b.plotly_chart(style(px.bar(m.groupby(["zona", "tipo_cliente"], as_index=False).size(), x="zona", y="size", color="tipo_cliente", title="Fugas por zona y tipo de cliente", labels={"size": "Fugas", "zona": "Zona", "tipo_cliente": "Tipo de cliente"}), 440), width="stretch")
     elif tab.startswith("Aten"):
         if fu.empty: vacio("Fugas", "el tiempo de respuesta y las fugas sin atender"); return
-        k = st.columns(4); pend = int((fu["atendida"] == 0).sum())
-        k[0].metric("Alertas", len(fu)); k[1].metric("Sin atender", pend); k[2].metric("Respuesta media", f"{fu['tiempo_respuesta_min'].mean():.1f} min"); k[3].metric("Mediana", f"{fu['tiempo_respuesta_min'].median():.1f} min")
+        pend = int((fu["atendida"] == 0).sum())
+        kpis([("Alertas", f"{len(fu)}", "Total de avisos de fuga o gas bajo que se han generado."),
+              ("Sin atender", f"{pend}", "Alertas que todavía nadie ha atendido. Son las que hay que revisar ya."),
+              ("Respuesta promedio", f"{fu['tiempo_respuesta_min'].mean():.1f} min", "Tiempo promedio que pasa desde que suena la alerta hasta que alguien la atiende."),
+              ("Respuesta típica", f"{fu['tiempo_respuesta_min'].median():.1f} min", "Es la mediana: la mitad de las alertas se atendió en menos tiempo que esto.")])
         a, b = st.columns([1.4, 1])
         v = fu.copy(); v["semáforo"] = np.where(v["atendida"] == 0, "Pendiente", np.where(v["tiempo_respuesta_min"] > 30, "Lenta", "Rápida"))
         a.dataframe(v.sort_values("fecha_hora", ascending=False)[["id_alerta", "id_tanque", "fecha_hora", "gravedad", "tiempo_respuesta_min", "semáforo"]].style.map(color_estado, subset=["semáforo"]), hide_index=True, height=380, width="stretch")
         b.plotly_chart(style(px.histogram(fu, x="tiempo_respuesta_min", nbins=10, title="Distribución del tiempo de respuesta (min)", labels={"tiempo_respuesta_min": "Minutos hasta atender", "count": "Alertas"}), 380), width="stretch")
+        b.caption("Cómo leerlo: cada barra agrupa alertas por el tiempo que tardaron en atenderse. Lo ideal es que las barras altas estén a la izquierda (atención rápida).")
     else:
         if pr.empty: vacio("Pruebas", "los resultados de los 30 ensayos por escenario"); return
-        k = st.columns(4); k[0].metric("Ensayos", f"{len(pr)}/30"); k[1].metric("Respuesta media", f"{pr['tiempo_respuesta_s'].mean():.1f} s")
-        k[2].metric("Latencia de aviso (mediana)", f"{pr['latencia_notificacion_s'].median():.1f} s"); k[3].metric("Alarma activada", f"{pr['alarma_activada'].mean():.0%}")
+        ESC = {"A": "A · Cocina", "B": "B · Exterior, junto a tanques", "C": "C · Comercio cerrado"}
+        pr = pr.assign(escenario=pr["escenario"].map(ESC).fillna(pr["escenario"]))
+        kpis([("Ensayos", f"{len(pr)}/30", "Pruebas del prototipo realizadas de las 30 planeadas (10 por lugar)."),
+              ("Respuesta del sensor", f"{pr['tiempo_respuesta_s'].mean():.1f} s", "Segundos que tarda en promedio el sensor en detectar el gas."),
+              ("Aviso al celular", f"{pr['latencia_notificacion_s'].median():.1f} s", "Segundos que tarda en llegar el aviso al celular (valor típico)."),
+              ("Alarma activada", f"{pr['alarma_activada'].mean():.0%}", "De cada 100 pruebas, en cuántas sí sonó la alarma.")])
         a, b = st.columns(2)
-        a.plotly_chart(style(px.box(pr, x="escenario", y="tiempo_respuesta_s", color="escenario", points="all", title="Tiempo de respuesta por escenario (s)", labels={"escenario": "Escenario", "tiempo_respuesta_s": "Segundos"})), width="stretch")
-        fg = px.scatter(pr, x="concentracion_ppm", y="tiempo_respuesta_s", color="escenario", title="Concentración de gas vs. tiempo de respuesta", labels={"concentracion_ppm": "Concentración (ppm)", "tiempo_respuesta_s": "Segundos", "escenario": "Escenario"}); q = pr.dropna(subset=["concentracion_ppm", "tiempo_respuesta_s"])
+        prom = pr.groupby("escenario", as_index=False)["tiempo_respuesta_s"].mean()
+        a.plotly_chart(style(px.bar(prom, x="escenario", y="tiempo_respuesta_s", text_auto=".1f", title="¿Qué tan rápido responde el sensor en cada lugar?", labels={"escenario": "Lugar de la prueba", "tiempo_respuesta_s": "Segundos"})), width="stretch")
+        a.caption("Cómo leerlo: cada barra es un lugar donde se probó. Entre más baja la barra, más rápido detectó el gas.")
+        fg = px.scatter(pr, x="concentracion_ppm", y="tiempo_respuesta_s", color="escenario", title="¿Más gas hace que el sensor responda más rápido?", labels={"concentracion_ppm": "Cantidad de gas (ppm)", "tiempo_respuesta_s": "Segundos en responder", "escenario": "Lugar"}); q = pr.dropna(subset=["concentracion_ppm", "tiempo_respuesta_s"])
         if len(q) > 3 and q["concentracion_ppm"].nunique() > 1:
             bb, a0 = np.polyfit(q["concentracion_ppm"], q["tiempo_respuesta_s"], 1); xs = np.array([q["concentracion_ppm"].min(), q["concentracion_ppm"].max()])
             fg.add_trace(go.Scatter(x=xs, y=a0 + bb * xs, mode="lines", name="Tendencia", line=dict(color=TERRACOTA, dash="dash")))
         b.plotly_chart(style(fg), width="stretch")
+        b.caption("Cómo leerlo: cada punto es una prueba. Si la línea punteada baja hacia la derecha, con más gas el sensor responde más rápido.")
     eap("Las fugas se ubican en el mapa y se mide qué tan rápido se atienden; las pruebas validan que el prototipo funciona.", "Zonas con más puntos rojos y tiempos largos necesitan atención.", "Reforzar la atención donde las respuestas sean lentas o haya fugas pendientes.")
 
 @st.dialog("Cómo se calcula")
@@ -740,38 +684,44 @@ def decisiones():
         if len(res):
             crit = res[res["estado"] == "Crítico"]; acc.append(("Crítico" if len(crit) else "Normal", "Reabastecer", f"{len(crit)} tanque(s) críticos: " + ", ".join(map(str, crit["id_tanque"].head(6))) if len(crit) else "Ningún tanque en estado crítico."))
     if not fu.empty:
-        pend = int((fu["atendida"] == 0).sum()); acc.append(("Crítico" if pend else "Normal", "Atender fugas", f"{pend} alerta(s) sin atender; respuesta mediana {fu['tiempo_respuesta_min'].median():.1f} min."))
-    u = st.slider("Umbral del MQ-6 a evaluar", 300, 700, 450, 5); pct = (SENS["mq6"] >= u).mean()
-    acc.append(("Atención" if pct > .1 else "Normal", "Calibrar el sensor", f"Con umbral {u}, el {pct:.1%} de las lecturas históricas serían alerta."))
-    
-    medidores = []
-    if not lect.empty and len(res): medidores.append((100 * (res["estado"] == "Crítico").mean(), "Tanques en estado crítico", BRICK))
-    if not fu.empty: medidores.append((100 * (fu["atendida"] == 0).mean(), "Fugas sin atender", MUSTARD))
-    medidores.append((round(pct * 100, 1), "Lecturas en alerta (MQ-6)", TERRACOTA))
-    
+        pend = int((fu["atendida"] == 0).sum()); acc.append(("Crítico" if pend else "Normal", "Atender fugas", f"{pend} alerta(s) sin atender; respuesta típica {fu['tiempo_respuesta_min'].median():.1f} min."))
+    sec("Qué tan sensible debe ser el sensor de gas")
+    st.markdown('<div class="nota"><b>¿Qué es el umbral?</b> El sensor entrega un número. Si la lectura llega a la línea que elijas, se cuenta como alerta. Línea baja: detecta fugas pequeñas, pero da más falsas alarmas. Línea alta: menos falsas alarmas, pero puede tardar en avisar.</div>', unsafe_allow_html=True)
+    u = st.slider("Línea de alerta (umbral)", 300, 700, 450, 5); pct = (SENS["mq6"] >= u).mean()
+    st.caption(f"Con la línea en {u}, el {pct:.1%} de las lecturas históricas habría disparado la alarma.")
+    acc.append(("Atención" if pct > .1 else "Normal", "Calibrar el sensor", f"Con la línea en {u}, el {pct:.1%} de las lecturas históricas serían alerta."))
+
     sec("Panorama")
-    for col, (val, tit, c) in zip(st.columns(len(medidores)), medidores):
-        with col:
-            kpi_card(f"{val:.1f}", tit, color=c)
-    
+    pan = []
+    if not lect.empty and len(res): pan.append((100 * (res["estado"] == "Crítico").mean(), "Tanques críticos", BRICK, "De cada 100 tanques, cuántos se quedarían sin gas en pocos días."))
+    if not fu.empty: pan.append((100 * (fu["atendida"] == 0).mean(), "Fugas sin atender", MUSTARD, "De cada 100 alertas, cuántas nadie ha atendido todavía."))
+    pan.append((round(pct * 100, 1), "Lecturas en alerta", TERRACOTA, "Con la línea de alerta que elegiste arriba, de cada 100 lecturas históricas cuántas habrían disparado la alarma."))
+    for col, (val, tit, c, ex) in zip(st.columns(len(pan)), pan):
+        with col: kpi_card(f"{val:.1f}", tit, color=c, explicacion=ex)
+
     if not ENC.empty:
         pc_ = (ENC["compraria"] == "Sí").sum() / max(ENC["compraria"].notna().sum(), 1); ut_ = (ENC["utilidad"] >= 4).sum() / max(ENC["utilidad"].notna().sum(), 1)
         p6 = (ENC["pago_unico"] == "Menos de $600").sum() / max(ENC["pago_unico"].notna().sum(), 1)
         acc.append(("Atención" if p6 >= .4 else "Normal", "Validación de mercado", f"{pc_:.0%} lo compraría y {ut_:.0%} califica el aviso con 4 o 5; {p6:.0%} pagaría menos de $600 por el dispositivo."))
-    
     _pm = mineria.prioridad(MIN)
     if _pm: acc.append(_pm)
 
     sec("Prioridades")
-    for est, t, d in acc: st.markdown(f'<div class="card" style="border-left-color:{ESTADO_COL[est]}"><b style="color:{ESTADO_COL[est]}">{est.upper()}</b> &nbsp;·&nbsp; <b>{t}:</b> {d}</div>', unsafe_allow_html=True)
-    
+    st.caption("Ordenadas de lo más urgente a lo que está en orden. Toca “Ver detalle” para ir a la sección donde se explica.")
+    DEST = {"Reabastecer": "analisis2", "Atender fugas": "analisis3", "Calibrar el sensor": "analisis1", "Validación de mercado": "analisis1"}
+    ETQ = {"Crítico": "URGENTE", "Atención": "ATENCIÓN", "Normal": "EN ORDEN"}; ORDEN = {"Crítico": 0, "Atención": 1, "Normal": 2}
+    for n, (est, t, d) in enumerate(sorted(acc, key=lambda x: ORDEN[x[0]])):
+        ct, cb = st.columns([8, 1.5], vertical_alignment="center")
+        ct.markdown(f'<div class="prio" style="border-left:4px solid {ESTADO_COL[est]}"><span class="chip" style="background:{ESTADO_COL[est]}">{ETQ[est]}</span><div><b>{t}</b><br>{d}</div></div>', unsafe_allow_html=True)
+        if t in DEST and cb.button("Ver detalle", key=f"prio_{n}"): st.switch_page(PAGES[DEST[t]])
+
     mineria.bloque(MIN, sec, kpi_card, style, eap, (NAVY, TERRACOTA, TEAL, MUSTARD, BRICK))
 
     sec("Plan de acción")
-    plan = st.data_editor(pd.DataFrame({"Acción": ["Recargar tanques críticos", "Atender fugas pendientes", "Ajustar el umbral del MQ-6", "Reforzar zonas de mayor demanda"], "Responsable": ["", "", "", ""], "Hecho": [False] * 4}), hide_index=True, width="stretch")
+    plan = st.data_editor(pd.DataFrame({"Acción": ["Recargar tanques críticos", "Atender fugas pendientes", "Ajustar la línea de alerta del sensor", "Reforzar zonas de mayor demanda"], "Responsable": ["", "", "", ""], "Hecho": [False] * 4}), hide_index=True, width="stretch")
     c1, c2, _ = st.columns([1, 1, 3]); c1.download_button("Descargar plan (CSV)", plan.to_csv(index=False).encode("utf-8-sig"), "plan_de_accion.csv", "text/csv", icon=":material/download:")
     if c2.button("Cómo se calcula", icon=":material/help:"): explicar()
-    eap("Las prioridades se generan solas con los datos cargados; sin datos no se inventan recomendaciones.", "Primero lo crítico, luego lo que requiere atención.", "Asignar un responsable a cada acción y dar seguimiento en el plan.")
+    eap("Las prioridades se generan solas con los datos cargados; sin datos no se inventan recomendaciones.", "Primero lo urgente, luego lo que requiere atención.", "Asignar un responsable a cada acción y dar seguimiento en el plan.")
 
 PAGES = {"inicio": st.Page(inicio, title="Inicio", icon=":material/home:", default=True),
          "analisis1": st.Page(analisis1, title="Análisis 1 · Descriptivo", icon=":material/bar_chart:", url_path="analisis1"),

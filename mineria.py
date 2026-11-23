@@ -79,10 +79,10 @@ def bloque(M, sec, kpi_card, style, eap, colores):
     a = _analiza(M); m = a["m"]; exa = a["aciertos"] / a["n"]
     st.caption(f"Fuente: {M['fuente']} · corrida **{m['ejecucion_id']}** · {a['n']:,} lecturas evaluadas")
     k = st.columns(4)
-    with k[0]: kpi_card(f"{exa*100:.1f}", "Exactitud (aciertos)", color=TEAL)
-    with k[1]: kpi_card(f"{_num(m.get('f1_pond'))*100:.1f}" if pd.notna(_num(m.get('f1_pond'))) else "n/d", "F1 ponderado", color=NAVY)
-    with k[2]: kpi_card(f"{_num(m.get('auc'))*100:.1f}" if pd.notna(_num(m.get('auc'))) else "n/d", "AUC (separación de clases)", color=TERRACOTA)
-    with k[3]: kpi_card(f"{a['n']-a['aciertos']:,}", "Lecturas mal clasificadas", rango=(0, max(a['n'], 1)), color=BRICK, sufijo="")
+    with k[0]: kpi_card(f"{exa*100:.1f}", "Exactitud (aciertos)", color=TEAL, explicacion="De cada 100 lecturas, en cuántas el modelo acertó el tipo de gas.")
+    with k[1]: kpi_card(f"{_num(m.get('f1_pond'))*100:.1f}" if pd.notna(_num(m.get('f1_pond'))) else "n/d", "F1 ponderado", color=NAVY, explicacion="Una nota que combina aciertos y falsas alarmas en todas las clases. Más cerca de 100, mejor.")
+    with k[2]: kpi_card(f"{_num(m.get('auc'))*100:.1f}" if pd.notna(_num(m.get('auc'))) else "n/d", "AUC (separación de clases)", color=TERRACOTA, explicacion="Qué tan bien el modelo distingue un tipo de gas de otro. 100 sería perfecto; 50, como lanzar una moneda.")
+    with k[3]: kpi_card(f"{a['n']-a['aciertos']:,}", "Lecturas mal clasificadas", rango=(0, max(a['n'], 1)), color=BRICK, sufijo="", explicacion="Cuántas lecturas el modelo confundió con otro tipo de gas.")
 
     c1, c2 = st.columns(2)
     z = a["cm"].values; cl = a["clases"]
