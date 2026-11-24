@@ -259,6 +259,8 @@ NUMERICAS = {"Tanques": ["capacidad_kg", "latitud", "longitud"],
              "Lecturas_Bascula": ["peso_kg", "nivel_pct"],
              "Fugas": ["nivel_mq6", "caida_peso_pct", "duracion_min", "kg_perdidos_estimados", "tiempo_respuesta_min", "atendida"]}
 
+SOL_COLS = ["id_solicitud", "id_tanque", "cliente", "estado", "estado_app", "fecha_solicitud", "fecha_actualizacion", "horas_entrega", "nivel_pct", "gas_kg", "direccion", "zona", "latitud", "longitud", "id_proveedor", "motivo_cancelacion"]
+
 @st.cache_data(ttl=30, show_spinner=False)
 def load_app_db():
     """Lee en vivo las vistas de solo lectura de la BD de la app. Devuelve (hojas, None) o (None, motivo)."""
@@ -271,14 +273,21 @@ def load_app_db():
             out[hoja] = df
         for h in ("Reabastecimientos", "Lecturas_Bascula", "Fugas"):
             out[h] = _fechas({"Reabastecimientos": out["Reabastecimientos"], "Lecturas_Bascula": out["Lecturas_Bascula"], "Fugas": out["Fugas"]})[h]
+        try:
+            sol = con.query("SELECT * FROM dash.solicitudes", ttl=0).reindex(columns=SOL_COLS)
+            for c in ("horas_entrega", "nivel_pct", "gas_kg", "latitud", "longitud"): sol[c] = pd.to_numeric(sol[c], errors="coerce")
+            for c in ("fecha_solicitud", "fecha_actualizacion"): sol[c] = pd.to_datetime(sol[c], errors="coerce")
+            out["Solicitudes"] = sol
+        except Exception:
+            out["Solicitudes"] = pd.DataFrame(columns=SOL_COLS)
         return out, None
     except Exception as e:
         return None, type(e).__name__
 
 def combinar(base, app, modo):
     """Une el Excel con la BD de la app. 'Pruebas' siempre sale del Excel (los 30 ensayos)."""
-    if app is None or modo == "Solo Excel": return base
-    out = {"Pruebas": base["Pruebas"]}
+    if app is None or modo == "Solo Excel": return {**base, "Solicitudes": pd.DataFrame(columns=SOL_COLS)}
+    out = {"Pruebas": base["Pruebas"], "Solicitudes": app.get("Solicitudes", pd.DataFrame(columns=SOL_COLS))}
     for h in VISTAS:
         partes = [df for df in ((app[h],) if modo == "Solo base de la app" else (base[h], app[h])) if not df.empty]
         out[h] = pd.concat(partes, ignore_index=True) if partes else pd.DataFrame(columns=SHEETS[h])
@@ -676,10 +685,51 @@ def analisis2():
     eap("Con la báscula se mide cuánto gas pierde el tanque por día; ese ritmo permite proyectar cuándo se acaba.", "Días restantes = (peso actual - reserva) / consumo diario. El simulador muestra el efecto de un cambio de consumo.",
         "Programar primero los tanques críticos y agrupar las rutas por zona.")
 
+ESTADO_SOL = {"Pendiente": MUSTARD, "En proceso": BLUE, "Entregada": TEAL, "Cancelada": "#7A8CA6"}
+PIN_SOL = {"Pendiente": "orange", "En proceso": "blue", "Entregada": "green", "Cancelada": "gray"}
+
+def solicitudes_gas():
+    so = D["Solicitudes"]
+    if so.empty:
+        with st.container(border=True):
+            st.markdown("**Todavía no hay solicitudes de gas**")
+            st.write("Cuando un cliente pida gas desde la app, la solicitud aparece aquí sola, con su ubicación en el mapa y su estado.")
+        return
+    est = filtro("Estado de la solicitud", list(ESTADO_SOL), "f_sol", "Sin selección se muestran todas. Toca una o varias para filtrar.")
+    v = so[so["estado"].isin(est)]
+    ent = so.loc[so["estado"] == "Entregada", "horas_entrega"].dropna()
+    kpis([("Solicitudes", f"{len(so)}", "Pedidos de gas que los clientes han hecho desde la app."),
+          ("Pendientes", f"{int((so['estado'] == 'Pendiente').sum())}", "Pedidos que todavía nadie ha tomado. Son los que hay que atender primero."),
+          ("En proceso", f"{int((so['estado'] == 'En proceso').sum())}", "Pedidos aceptados o en camino hacia el cliente."),
+          ("Entregadas", f"{int((so['estado'] == 'Entregada').sum())}", "Pedidos ya surtidos."),
+          ("Entrega típica", f"{ent.median():.1f} h" if len(ent) else "Sin datos", "Horas que pasan, de la solicitud a la entrega, en la mitad de los pedidos (mediana).")])
+    a, b = st.columns([1.6, 1])
+    ll = v.dropna(subset=["latitud", "longitud"])
+    if len(ll):
+        ms = folium.Map(location=[21.143, -88.15], zoom_start=13, **MAPKW)
+        if MAPCSS: ms.get_root().header.add_child(folium.Element(MAPCSS))
+        _encuadre(ms, ll)
+        for _, r in ll.iterrows():
+            folium.Marker([r["latitud"], r["longitud"]],
+                          tooltip=folium.Tooltip(f"{str(r['cliente']).split(' · ')[-1]}<i>{r['estado']}</i>"),
+                          popup=ficha("Solicitud", r["id_solicitud"], r["estado"], ESTADO_SOL[r["estado"]],
+                                      [("Cliente", str(r["cliente"]).split(" · ")[0]), ("Tanque", r["id_tanque"]),
+                                       ("Nivel al pedir", f"{r['nivel_pct']:.0f} %" if pd.notna(r["nivel_pct"]) else "—"),
+                                       ("Solicitada", r["fecha_solicitud"].strftime("%d/%m %H:%M") if pd.notna(r["fecha_solicitud"]) else "—")]),
+                          icon=folium.Icon(color=PIN_SOL[r["estado"]], icon="truck", prefix="fa")).add_to(ms)
+        with a: st_folium(ms, width="100%", height=420, returned_objects=[]); a.caption("Cómo leerlo: cada pin es el lugar de entrega de una solicitud. Naranja = pendiente, azul = en proceso, verde = entregada, gris = cancelada.")
+    else:
+        a.caption("Las solicitudes no traen ubicación todavía.")
+    cnt = so.groupby("estado", as_index=False).size()
+    b.plotly_chart(style(px.bar(cnt, x="estado", y="size", color="estado", color_discrete_map=ESTADO_SOL, title="Solicitudes por estado", labels={"size": "Solicitudes", "estado": "Estado"}).update_layout(showlegend=False).update_yaxes(dtick=1), 420), width="stretch")
+    sec("Detalle de las solicitudes")
+    mineria.tabla(v.sort_values("fecha_solicitud", ascending=False)[["id_solicitud", "cliente", "estado", "fecha_solicitud", "nivel_pct", "zona", "direccion"]].rename(columns={
+        "id_solicitud": "Solicitud", "cliente": "Cliente", "estado": "Estado", "fecha_solicitud": "Solicitada", "nivel_pct": "Nivel al pedir (%)", "zona": "Zona", "direccion": "Dirección"}))
+
 def analisis3():
     _sec_num[0] = 0
-    header("Análisis 3 · Fugas", "R3 y R4 · ¿Dónde hay fugas, qué tan rápido se atienden y cómo se comporta el prototipo?")
-    tab = st.segmented_control("Sección", ["Mapa de fugas (R3)", "Atención (R4)", "Pruebas del prototipo"], default="Mapa de fugas (R3)", label_visibility="collapsed", key="v3") or "Mapa de fugas (R3)"
+    header("Análisis 3 · Fugas", "R3 y R4 · ¿Dónde hay fugas, qué tan rápido se atienden, cómo se comporta el prototipo y qué pedidos de gas hay?")
+    tab = st.segmented_control("Sección", ["Mapa de fugas (R3)", "Atención (R4)", "Solicitudes de gas", "Pruebas del prototipo"], default="Mapa de fugas (R3)", label_visibility="collapsed", key="v3") or "Mapa de fugas (R3)"
     fu, tq, pr = D["Fugas"], D["Tanques"], D["Pruebas"]
     if tab.startswith("Mapa"):
         if fu.empty: vacio("Fugas", "el mapa de fugas por zona y tipo de cliente"); return
@@ -704,6 +754,8 @@ def analisis3():
                 ).add_to(mf)
             with a: st_folium(mf, width="100%", height=440, returned_objects=[]); a.caption("Cómo leerlo: cada pin es una alerta. Rojo = gravedad alta, naranja = media, verde = leve.")
         b.plotly_chart(style(px.bar(m.groupby(["zona", "tipo_cliente"], as_index=False).size(), x="zona", y="size", color="tipo_cliente", title="Fugas por zona y tipo de cliente", labels={"size": "Fugas", "zona": "Zona", "tipo_cliente": "Tipo de cliente"}), 440), width="stretch")
+    elif tab.startswith("Solic"):
+        solicitudes_gas()
     elif tab.startswith("Aten"):
         if fu.empty: vacio("Fugas", "el tiempo de respuesta y las fugas sin atender"); return
         pend = int((fu["atendida"] == 0).sum())
@@ -770,11 +822,14 @@ def decisiones():
         pc_ = (ENC["compraria"] == "Sí").sum() / max(ENC["compraria"].notna().sum(), 1); ut_ = (ENC["utilidad"] >= 4).sum() / max(ENC["utilidad"].notna().sum(), 1)
         p6 = (ENC["pago_unico"] == "Menos de $600").sum() / max(ENC["pago_unico"].notna().sum(), 1)
         acc.append(("Atención" if p6 >= .4 else "Normal", "Validación de mercado", f"{pc_:.0%} lo compraría y {ut_:.0%} califica el aviso con 4 o 5; {p6:.0%} pagaría menos de $600 por el dispositivo."))
+    so_ = D.get("Solicitudes", pd.DataFrame())
+    if len(so_):
+        pen_ = int((so_["estado"] == "Pendiente").sum()); acc.append(("Atención" if pen_ else "Normal", "Solicitudes de gas", f"{pen_} pedido(s) de gas esperando ser atendidos de {len(so_)} en total." if pen_ else f"Los {len(so_)} pedidos de gas están atendidos o en camino."))
     _pm = mineria.prioridad(MIN)
     if _pm: acc.append(_pm)
 
     sec("Prioridades")
-    DEST = {"Reabastecer": "analisis2", "Atender fugas": "analisis3", "Calibrar el sensor": "analisis1", "Validación de mercado": "analisis1"}
+    DEST = {"Reabastecer": "analisis2", "Atender fugas": "analisis3", "Calibrar el sensor": "analisis1", "Validación de mercado": "analisis1", "Solicitudes de gas": "analisis3"}
     ETQ = {"Crítico": "URGENTE", "Atención": "ATENCIÓN", "Normal": "EN ORDEN"}; ORDEN = {"Crítico": 0, "Atención": 1, "Normal": 2}
     cuenta = {e: sum(1 for x in acc if x[0] == e) for e in ORDEN}
     op = ["Todas"] + [f"{ETQ[e].capitalize()} ({cuenta[e]})" for e in ORDEN if cuenta[e]]
